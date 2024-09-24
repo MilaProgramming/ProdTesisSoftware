@@ -1,0 +1,7 @@
+MLModel.Classes.Node module
+===========================
+
+.. automodule:: Classes.Node
+   :members:
+   :undoc-members:
+   :show-inheritance:
