@@ -33,13 +33,56 @@
             
   <h1>Código fuente para MLModel.Classes.DecisionTree</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="c1"># Class for defining the binary tree, having already defined the node</span>
-<span class="kn">from</span> <span class="nn">.Node</span> <span class="kn">import</span> <span class="n">Node</span> 
+<span class="kn">from</span> <span class="nn">.Node</span> <span class="kn">import</span> <span class="n">Node</span> <span class="c1"># Clase para definir el árbol de decisión, utilizando previamente la clase Node </span>
 
 <div class="viewcode-block" id="DecisionTree">
 <a class="viewcode-back" href="../../../MLModel.Classes.DecisionTree.html#MLModel.Classes.DecisionTree.DecisionTree">[documentos]</a>
 <span class="k">class</span> <span class="nc">DecisionTree</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">min_samples_split</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>  <span class="c1"># max_depth: maximum depth of the tree, min_samples_split: minimum number of samples required to split an internal node</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Una clase que representa un árbol de decisión binario.</span>
+
+<span class="sd">    Atributos</span>
+<span class="sd">    ---------</span>
+<span class="sd">    max_depth : int</span>
+<span class="sd">        La profundidad máxima permitida para el árbol de decisión.</span>
+<span class="sd">    min_samples_split : int</span>
+<span class="sd">        El número mínimo de muestras requeridas para dividir un nodo interno.</span>
+<span class="sd">    root : Node</span>
+<span class="sd">        La raíz del árbol de decisión, que es un objeto de la clase Node.</span>
+
+<span class="sd">    Métodos</span>
+<span class="sd">    -------</span>
+<span class="sd">    fit(X, y)</span>
+<span class="sd">        Ajusta el árbol a los datos proporcionados, construyendo la estructura del árbol.</span>
+<span class="sd">    predict(X)</span>
+<span class="sd">        Predice las etiquetas para los datos proporcionados en función del árbol de decisión entrenado.</span>
+<span class="sd">    _build_tree(X, y, depth)</span>
+<span class="sd">        Método auxiliar para construir recursivamente el árbol de decisión.</span>
+<span class="sd">    _best_split(X, y, feat_idxs)</span>
+<span class="sd">        Encuentra la mejor característica y umbral para dividir los datos, maximizando la pureza.</span>
+<span class="sd">    _calculate_gini(X_column, y, threshold)</span>
+<span class="sd">        Calcula la impureza de Gini para una característica y un umbral dados.</span>
+<span class="sd">    _split(X_column, split_thresh)</span>
+<span class="sd">        Divide los datos en dos subconjuntos en función de un umbral.</span>
+<span class="sd">    _most_common_label(y)</span>
+<span class="sd">        Encuentra la etiqueta más común en un conjunto de datos, utilizada para nodos hoja.</span>
+<span class="sd">    _traverse_tree(x, node)</span>
+<span class="sd">        Recorre el árbol desde la raíz hasta un nodo hoja para predecir el valor de una muestra.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">min_samples_split</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>  
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el árbol de decisión con los parámetros especificados.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        max_depth : int, opcional</span>
+<span class="sd">            La profundidad máxima del árbol de decisión (por defecto es 10).</span>
+<span class="sd">        min_samples_split : int, opcional</span>
+<span class="sd">            El número mínimo de muestras necesarias para dividir un nodo interno (por defecto es 2).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span> <span class="o">=</span> <span class="n">max_depth</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_samples_split</span> <span class="o">=</span> <span class="n">min_samples_split</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="kc">None</span>
@@ -47,46 +90,103 @@
 <div class="viewcode-block" id="DecisionTree.fit">
 <a class="viewcode-back" href="../../../MLModel.Classes.DecisionTree.html#MLModel.Classes.DecisionTree.DecisionTree.fit">[documentos]</a>
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="c1"># Build the tree</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ajusta el árbol a los datos de entrada, construyendo la estructura del árbol.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array de forma (n_samples, n_features)</span>
+<span class="sd">            Las características de entrenamiento.</span>
+<span class="sd">        y : array de forma (n_samples)</span>
+<span class="sd">            Las etiquetas correspondientes a los datos de entrenamiento.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_tree</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
 
     
-    <span class="c1"># Helper function to calculate the gini impurity</span>
 <div class="viewcode-block" id="DecisionTree.gini_impurity">
 <a class="viewcode-back" href="../../../MLModel.Classes.DecisionTree.html#MLModel.Classes.DecisionTree.DecisionTree.gini_impurity">[documentos]</a>
     <span class="k">def</span> <span class="nf">gini_impurity</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calcula la impureza de Gini para un conjunto de etiquetas.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        labels : array</span>
+<span class="sd">            Las etiquetas de las cuales calcular la impureza de Gini.</span>
+
+<span class="sd">        Retorna</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            El valor de la impureza de Gini.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># Devuelve los valores únicos y sus recuentos</span>
         <span class="n">probabilities</span> <span class="o">=</span> <span class="n">counts</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
-        <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">probabilities</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">probabilities</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> </div>
 
 
     <span class="k">def</span> <span class="nf">_build_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="n">num_samples</span><span class="p">,</span> <span class="n">num_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">num_labels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construye recursivamente el árbol de decisión.</span>
 
-        <span class="c1"># Stopping criteria</span>
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array</span>
+<span class="sd">            Las características de los datos de entrada.</span>
+<span class="sd">        y : array</span>
+<span class="sd">            Las etiquetas correspondientes a los datos de entrada.</span>
+<span class="sd">        depth : int, opcional</span>
+<span class="sd">            La profundidad actual del árbol (por defecto es 0).</span>
+
+<span class="sd">        Retorna</span>
+<span class="sd">        -------</span>
+<span class="sd">        Node</span>
+<span class="sd">            El nodo raíz del árbol construido.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">num_samples</span><span class="p">,</span> <span class="n">num_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>  
+        <span class="n">num_labels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> 
+
+        <span class="c1"># Condiciones de parada</span>
         <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span> <span class="ow">or</span> <span class="n">num_samples</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_samples_split</span> <span class="ow">or</span> <span class="n">num_labels</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">leaf_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_most_common_label</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">Node</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">leaf_value</span><span class="p">)</span>
 
-        <span class="c1"># Random feature selection</span>
+        <span class="c1"># Selección aleatoria de característica</span>
         <span class="n">feat_idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">num_features</span><span class="p">,</span> <span class="n">num_features</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="c1"># Find the best split</span>
+        <span class="c1"># Encontrar la mejor característica y umbral para dividir</span>
         <span class="n">best_feat</span><span class="p">,</span> <span class="n">best_thresh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_best_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">feat_idxs</span><span class="p">)</span>
 
-        <span class="c1"># Create child nodes</span>
+        <span class="c1"># Crear subárboles</span>
         <span class="n">left_idxs</span><span class="p">,</span> <span class="n">right_idxs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">best_feat</span><span class="p">],</span> <span class="n">best_thresh</span><span class="p">)</span>
         <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_tree</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">left_idxs</span><span class="p">,</span> <span class="p">:],</span> <span class="n">y</span><span class="p">[</span><span class="n">left_idxs</span><span class="p">],</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_tree</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">right_idxs</span><span class="p">,</span> <span class="p">:],</span> <span class="n">y</span><span class="p">[</span><span class="n">right_idxs</span><span class="p">],</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Node</span><span class="p">(</span><span class="n">feature</span><span class="o">=</span><span class="n">best_feat</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">best_thresh</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="n">right</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_best_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">feat_idxs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Encuentra la mejor división para un conjunto de datos dado en función de la impureza de Gini.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array</span>
+<span class="sd">            Las características de los datos de entrada.</span>
+<span class="sd">        y : array</span>
+<span class="sd">            Las etiquetas correspondientes a los datos de entrada.</span>
+<span class="sd">        feat_idxs : array</span>
+<span class="sd">            Los índices de las características seleccionadas para considerar las divisiones.</span>
+
+<span class="sd">        Retorna</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple</span>
+<span class="sd">            Una tupla que contiene el índice de la mejor característica y el mejor valor de umbral para dividir.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">best_gini</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
         <span class="n">split_idx</span><span class="p">,</span> <span class="n">split_thresh</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        
         <span class="k">for</span> <span class="n">feat_idx</span> <span class="ow">in</span> <span class="n">feat_idxs</span><span class="p">:</span>
             <span class="n">X_column</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="n">feat_idx</span><span class="p">]</span>
             <span class="n">thresholds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">X_column</span><span class="p">)</span>
+            
             <span class="k">for</span> <span class="n">threshold</span> <span class="ow">in</span> <span class="n">thresholds</span><span class="p">:</span>
                 <span class="n">gini</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_gini</span><span class="p">(</span><span class="n">X_column</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">gini</span> <span class="o">&lt;</span> <span class="n">best_gini</span><span class="p">:</span>
@@ -96,6 +196,23 @@
         <span class="k">return</span> <span class="n">split_idx</span><span class="p">,</span> <span class="n">split_thresh</span>
 
     <span class="k">def</span> <span class="nf">_calculate_gini</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_column</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calcula la impureza de Gini de un conjunto de datos para una columna dada y un umbral de división.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X_column : array</span>
+<span class="sd">            La columna de características que se está utilizando para evaluar la división.</span>
+<span class="sd">        y : array</span>
+<span class="sd">            Las etiquetas correspondientes a los datos de entrada.</span>
+<span class="sd">        threshold : float</span>
+<span class="sd">            El valor de umbral para dividir los datos en dos subconjuntos.</span>
+
+<span class="sd">        Retorna</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            La impureza de Gini ponderada de la división. Si la división no es válida, devuelve infinito.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">left_idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">X_column</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">)</span>
         <span class="n">right_idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">X_column</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">)</span>
 
@@ -108,20 +225,76 @@
         <span class="k">return</span> <span class="n">weighted_gini</span>
 
     <span class="k">def</span> <span class="nf">_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_column</span><span class="p">,</span> <span class="n">split_thresh</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Divide una columna de características en dos subconjuntos basados en un umbral de división.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X_column : array</span>
+<span class="sd">            La columna de características que se está utilizando para dividir los datos.</span>
+<span class="sd">        split_thresh : float</span>
+<span class="sd">            El valor del umbral utilizado para dividir los datos.</span>
+
+<span class="sd">        Retorna</span>
+<span class="sd">        -------</span>
+<span class="sd">        tuple of arrays</span>
+<span class="sd">            Índices del subconjunto izquierdo (valores menores o iguales al umbral) y el subconjunto derecho (valores mayores al umbral).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">left_idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">X_column</span> <span class="o">&lt;=</span> <span class="n">split_thresh</span><span class="p">)</span>
         <span class="n">right_idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">X_column</span> <span class="o">&gt;</span> <span class="n">split_thresh</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">left_idxs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">right_idxs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_most_common_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Encuentra la etiqueta más común en un conjunto de datos.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        y : array</span>
+<span class="sd">            Un array que contiene las etiquetas de los datos.</span>
+
+<span class="sd">        Retorna</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            La etiqueta que aparece con mayor frecuencia en `y`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
 
 <div class="viewcode-block" id="DecisionTree.predict">
 <a class="viewcode-back" href="../../../MLModel.Classes.DecisionTree.html#MLModel.Classes.DecisionTree.DecisionTree.predict">[documentos]</a>
     <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predice las etiquetas para las muestras de entrada utilizando el árbol de decisión entrenado.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array</span>
+<span class="sd">            Un conjunto de características (datos de entrada) donde cada fila representa una muestra.</span>
+
+<span class="sd">        Retorna</span>
+<span class="sd">        -------</span>
+<span class="sd">        array</span>
+<span class="sd">            Un array con las etiquetas predichas para cada muestra en X.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_traverse_tree</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">X</span><span class="p">])</span></div>
 
 
     <span class="k">def</span> <span class="nf">_traverse_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Recorre recursivamente el árbol de decisión para una muestra, devolviendo la predicción.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : array</span>
+<span class="sd">            Una muestra de características.</span>
+<span class="sd">        node : Node</span>
+<span class="sd">            El nodo actual en el árbol de decisión.</span>
+
+<span class="sd">        Retorna</span>
+<span class="sd">        -------</span>
+<span class="sd">        valor de la etiqueta</span>
+<span class="sd">            La etiqueta predicha por el árbol de decisión.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">is_leaf_node</span><span class="p">():</span>
             <span class="k">return</span> <span class="n">node</span><span class="o">.</span><span class="n">value</span>
 

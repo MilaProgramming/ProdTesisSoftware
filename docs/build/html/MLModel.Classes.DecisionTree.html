@@ -40,21 +40,94 @@
 <dt class="sig sig-object py" id="MLModel.Classes.DecisionTree.DecisionTree">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MLModel.Classes.DecisionTree.</span></span><span class="sig-name descname"><span class="pre">DecisionTree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_samples_split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MLModel/Classes/DecisionTree.html#DecisionTree"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#MLModel.Classes.DecisionTree.DecisionTree" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Una clase que representa un árbol de decisión binario.</p>
+<section id="atributos">
+<h2>Atributos<a class="headerlink" href="#atributos" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>max_depth<span class="classifier">int</span></dt><dd><p>La profundidad máxima permitida para el árbol de decisión.</p>
+</dd>
+<dt>min_samples_split<span class="classifier">int</span></dt><dd><p>El número mínimo de muestras requeridas para dividir un nodo interno.</p>
+</dd>
+<dt>root<span class="classifier">Node</span></dt><dd><p>La raíz del árbol de decisión, que es un objeto de la clase Node.</p>
+</dd>
+</dl>
+</section>
+<section id="metodos">
+<h2>Métodos<a class="headerlink" href="#metodos" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>fit(X, y)</dt><dd><p>Ajusta el árbol a los datos proporcionados, construyendo la estructura del árbol.</p>
+</dd>
+<dt>predict(X)</dt><dd><p>Predice las etiquetas para los datos proporcionados en función del árbol de decisión entrenado.</p>
+</dd>
+<dt>_build_tree(X, y, depth)</dt><dd><p>Método auxiliar para construir recursivamente el árbol de decisión.</p>
+</dd>
+<dt>_best_split(X, y, feat_idxs)</dt><dd><p>Encuentra la mejor característica y umbral para dividir los datos, maximizando la pureza.</p>
+</dd>
+<dt>_calculate_gini(X_column, y, threshold)</dt><dd><p>Calcula la impureza de Gini para una característica y un umbral dados.</p>
+</dd>
+<dt>_split(X_column, split_thresh)</dt><dd><p>Divide los datos en dos subconjuntos en función de un umbral.</p>
+</dd>
+<dt>_most_common_label(y)</dt><dd><p>Encuentra la etiqueta más común en un conjunto de datos, utilizada para nodos hoja.</p>
+</dd>
+<dt>_traverse_tree(x, node)</dt><dd><p>Recorre el árbol desde la raíz hasta un nodo hoja para predecir el valor de una muestra.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="MLModel.Classes.DecisionTree.DecisionTree.fit">
 <span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MLModel/Classes/DecisionTree.html#DecisionTree.fit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#MLModel.Classes.DecisionTree.DecisionTree.fit" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Ajusta el árbol a los datos de entrada, construyendo la estructura del árbol.</p>
+<section id="parametros">
+<h3>Parámetros<a class="headerlink" href="#parametros" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>X<span class="classifier">array de forma (n_samples, n_features)</span></dt><dd><p>Las características de entrenamiento.</p>
+</dd>
+<dt>y<span class="classifier">array de forma (n_samples)</span></dt><dd><p>Las etiquetas correspondientes a los datos de entrenamiento.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MLModel.Classes.DecisionTree.DecisionTree.gini_impurity">
 <span class="sig-name descname"><span class="pre">gini_impurity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/MLModel/Classes/DecisionTree.html#DecisionTree.gini_impurity"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#MLModel.Classes.DecisionTree.DecisionTree.gini_impurity" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Calcula la impureza de Gini para un conjunto de etiquetas.</p>
+<section id="id1">
+<h3>Parámetros<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>labels<span class="classifier">array</span></dt><dd><p>Las etiquetas de las cuales calcular la impureza de Gini.</p>
+</dd>
+</dl>
+</section>
+<section id="retorna">
+<h3>Retorna<a class="headerlink" href="#retorna" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>float</dt><dd><p>El valor de la impureza de Gini.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MLModel.Classes.DecisionTree.DecisionTree.predict">
 <span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MLModel/Classes/DecisionTree.html#DecisionTree.predict"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#MLModel.Classes.DecisionTree.DecisionTree.predict" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Predice las etiquetas para las muestras de entrada utilizando el árbol de decisión entrenado.</p>
+<section id="id2">
+<h3>Parámetros<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>X<span class="classifier">array</span></dt><dd><p>Un conjunto de características (datos de entrada) donde cada fila representa una muestra.</p>
+</dd>
+</dl>
+</section>
+<section id="id3">
+<h3>Retorna<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>array</dt><dd><p>Un array con las etiquetas predichas para cada muestra en X.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
+</section>
 </dd></dl>
 
 </section>
