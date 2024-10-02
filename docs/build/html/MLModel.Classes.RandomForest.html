@@ -40,16 +40,71 @@
 <dt class="sig sig-object py" id="MLModel.Classes.RandomForest.RandomForest">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MLModel.Classes.RandomForest.</span></span><span class="sig-name descname"><span class="pre">RandomForest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_trees</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_samples_split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MLModel/Classes/RandomForest.html#RandomForest"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#MLModel.Classes.RandomForest.RandomForest" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Un bosque aleatorio basado en árboles de decisión.</p>
+<section id="parametros">
+<h2>Parámetros<a class="headerlink" href="#parametros" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>num_trees<span class="classifier">int, opcional</span></dt><dd><p>El número de árboles en el bosque (por defecto 100).</p>
+</dd>
+<dt>max_depth<span class="classifier">int, opcional</span></dt><dd><p>La profundidad máxima de cada árbol (por defecto 10).</p>
+</dd>
+<dt>min_samples_split<span class="classifier">int, opcional</span></dt><dd><p>El número mínimo de muestras requerido para dividir un nodo (por defecto 2).</p>
+</dd>
+</dl>
+</section>
+<section id="atributos">
+<h2>Atributos<a class="headerlink" href="#atributos" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>trees<span class="classifier">list</span></dt><dd><p>Una lista que contiene los árboles de decisión entrenados.</p>
+</dd>
+</dl>
+</section>
+<section id="metodos">
+<h2>Métodos<a class="headerlink" href="#metodos" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>fit(X, y)</dt><dd><p>Entrena el bosque aleatorio utilizando un conjunto de características y etiquetas.</p>
+</dd>
+<dt>_bootstrap_sample(X, y)</dt><dd><p>Genera una muestra de bootstrap a partir de los datos de entrada.</p>
+</dd>
+<dt>predict(X)</dt><dd><p>Predice las etiquetas para las muestras de entrada utilizando el bosque aleatorio.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="MLModel.Classes.RandomForest.RandomForest.fit">
 <span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MLModel/Classes/RandomForest.html#RandomForest.fit"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#MLModel.Classes.RandomForest.RandomForest.fit" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Entrena el bosque aleatorio a los datos de entrada.</p>
+<section id="id1">
+<h3>Parámetros<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>X<span class="classifier">array</span></dt><dd><p>Las características del conjunto de datos de entrada.</p>
+</dd>
+<dt>y<span class="classifier">array</span></dt><dd><p>Las etiquetas correspondientes a los datos de entrada.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="MLModel.Classes.RandomForest.RandomForest.predict">
 <span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/MLModel/Classes/RandomForest.html#RandomForest.predict"><span class="viewcode-link"><span class="pre">[fuente]</span></span></a><a class="headerlink" href="#MLModel.Classes.RandomForest.RandomForest.predict" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Predice las etiquetas para las muestras de entrada utilizando un voto mayoritario de los árboles en el bosque.</p>
+<section id="id2">
+<h3>Parámetros<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>X<span class="classifier">array</span></dt><dd><p>Las características de las muestras de entrada.</p>
+</dd>
+</dl>
+</section>
+<section id="retorna">
+<h3>Retorna<a class="headerlink" href="#retorna" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>array</dt><dd><p>Un array con las etiquetas predichas para cada muestra en X.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
 
+</section>
 </dd></dl>
 
 </section>

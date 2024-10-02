@@ -38,7 +38,45 @@
 <div class="viewcode-block" id="RandomForest">
 <a class="viewcode-back" href="../../../MLModel.Classes.RandomForest.html#MLModel.Classes.RandomForest.RandomForest">[documentos]</a>
 <span class="k">class</span> <span class="nc">RandomForest</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Un bosque aleatorio basado en árboles de decisión.</span>
+
+<span class="sd">    Parámetros</span>
+<span class="sd">    ----------</span>
+<span class="sd">    num_trees : int, opcional</span>
+<span class="sd">        El número de árboles en el bosque (por defecto 100).</span>
+<span class="sd">    max_depth : int, opcional</span>
+<span class="sd">        La profundidad máxima de cada árbol (por defecto 10).</span>
+<span class="sd">    min_samples_split : int, opcional</span>
+<span class="sd">        El número mínimo de muestras requerido para dividir un nodo (por defecto 2).</span>
+
+<span class="sd">    Atributos</span>
+<span class="sd">    ---------</span>
+<span class="sd">    trees : list</span>
+<span class="sd">        Una lista que contiene los árboles de decisión entrenados.</span>
+
+<span class="sd">    Métodos</span>
+<span class="sd">    -------</span>
+<span class="sd">    fit(X, y)</span>
+<span class="sd">        Entrena el bosque aleatorio utilizando un conjunto de características y etiquetas.</span>
+<span class="sd">    _bootstrap_sample(X, y)</span>
+<span class="sd">        Genera una muestra de bootstrap a partir de los datos de entrada.</span>
+<span class="sd">    predict(X)</span>
+<span class="sd">        Predice las etiquetas para las muestras de entrada utilizando el bosque aleatorio.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_trees</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">min_samples_split</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inicializa el bosque aleatorio con los parámetros dados.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        num_trees : int, opcional</span>
+<span class="sd">            El número de árboles en el bosque.</span>
+<span class="sd">        max_depth : int, opcional</span>
+<span class="sd">            La profundidad máxima permitida para cada árbol.</span>
+<span class="sd">        min_samples_split : int, opcional</span>
+<span class="sd">            El número mínimo de muestras requerido para realizar una división en un nodo.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_trees</span> <span class="o">=</span> <span class="n">num_trees</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span> <span class="o">=</span> <span class="n">max_depth</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_samples_split</span> <span class="o">=</span> <span class="n">min_samples_split</span>
@@ -47,6 +85,16 @@
 <div class="viewcode-block" id="RandomForest.fit">
 <a class="viewcode-back" href="../../../MLModel.Classes.RandomForest.html#MLModel.Classes.RandomForest.RandomForest.fit">[documentos]</a>
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Entrena el bosque aleatorio a los datos de entrada.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array</span>
+<span class="sd">            Las características del conjunto de datos de entrada.</span>
+<span class="sd">        y : array</span>
+<span class="sd">            Las etiquetas correspondientes a los datos de entrada.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">trees</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_trees</span><span class="p">):</span>
             <span class="n">tree</span> <span class="o">=</span> <span class="n">DecisionTree</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span><span class="p">,</span> <span class="n">min_samples_split</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_samples_split</span><span class="p">)</span>
@@ -56,6 +104,21 @@
 
 
     <span class="k">def</span> <span class="nf">_bootstrap_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Crea una muestra de bootstrap del conjunto de datos.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array</span>
+<span class="sd">            Las características del conjunto de datos de entrada.</span>
+<span class="sd">        y : array</span>
+<span class="sd">            Las etiquetas correspondientes a los datos de entrada.</span>
+
+<span class="sd">        Retorna</span>
+<span class="sd">        -------</span>
+<span class="sd">        X_sample, y_sample : array, array</span>
+<span class="sd">            Una muestra de las características y las etiquetas con reposición.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">n_samples</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">n_samples</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">X</span><span class="p">[</span><span class="n">indices</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span>
@@ -63,9 +126,20 @@
 <div class="viewcode-block" id="RandomForest.predict">
 <a class="viewcode-back" href="../../../MLModel.Classes.RandomForest.html#MLModel.Classes.RandomForest.RandomForest.predict">[documentos]</a>
     <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="c1"># Get predictions from each tree</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predice las etiquetas para las muestras de entrada utilizando un voto mayoritario de los árboles en el bosque.</span>
+
+<span class="sd">        Parámetros</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : array</span>
+<span class="sd">            Las características de las muestras de entrada.</span>
+
+<span class="sd">        Retorna</span>
+<span class="sd">        -------</span>
+<span class="sd">        array</span>
+<span class="sd">            Un array con las etiquetas predichas para cada muestra en X.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">tree_preds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">tree</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trees</span><span class="p">])</span>
-        <span class="c1"># Majority vote for classification</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">arr</span><span class="o">=</span><span class="n">tree_preds</span><span class="p">)</span></div>
 </div>
 
