@@ -64,7 +64,7 @@ class DecisionTree:
         """
         self.root = self._build_tree(X, y)
     
-    def gini_impurity(labels):
+    def gini_impurity(self, labels):
         """
         Calcula la impureza de Gini para un conjunto de etiquetas.
 
@@ -103,18 +103,23 @@ class DecisionTree:
         num_samples, num_features = X.shape  
         num_labels = len(np.unique(y)) 
 
-        # Condiciones de parada
+        # Stopping conditions
         if depth >= self.max_depth or num_samples < self.min_samples_split or num_labels == 1:
             leaf_value = self._most_common_label(y)
             return Node(value=leaf_value)
 
-        # Selección aleatoria de característica
+        # Select random feature indices
         feat_idxs = np.random.choice(num_features, num_features, replace=True)
 
-        # Encontrar la mejor característica y umbral para dividir
+        # Find the best split
         best_feat, best_thresh = self._best_split(X, y, feat_idxs)
 
-        # Crear subárboles
+        # If no valid split is found, create a leaf node
+        if best_feat is None or best_thresh is None:
+            leaf_value = self._most_common_label(y)
+            return Node(value=leaf_value)
+
+        # Split data and recurse
         left_idxs, right_idxs = self._split(X[:, best_feat], best_thresh)
         left = self._build_tree(X[left_idxs, :], y[left_idxs], depth + 1)
         right = self._build_tree(X[right_idxs, :], y[right_idxs], depth + 1)
@@ -140,17 +145,22 @@ class DecisionTree:
         """
         best_gini = float("inf")
         split_idx, split_thresh = None, None
-        
+
         for feat_idx in feat_idxs:
             X_column = X[:, feat_idx]
             thresholds = np.unique(X_column)
-            
+
             for threshold in thresholds:
                 gini = self._calculate_gini(X_column, y, threshold)
                 if gini < best_gini:
                     best_gini = gini
                     split_idx = feat_idx
                     split_thresh = threshold
+
+        # If no valid split is found, return None
+        if split_idx is None or split_thresh is None:
+            return None, None
+
         return split_idx, split_thresh
 
     def _calculate_gini(self, X_column, y, threshold):

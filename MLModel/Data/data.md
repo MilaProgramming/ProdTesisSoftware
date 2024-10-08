@@ -26,7 +26,7 @@ A continuación se describen las variables contenidas en el conjunto de datos:
 
 En el documento técnico del proyecto, se observó que algunos datos numéricos son en realidad categóricos. A continuación, se describen estos valores:
 
-- **Motivo de la visita (Injury)**:
+- **Existencia de lesión (Injury)**:
 
   - `1`: No.
   - `2`: Sí.

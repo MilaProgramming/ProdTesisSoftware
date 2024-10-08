@@ -7,6 +7,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   MLModel.Classes.DataCleaning
    MLModel.Classes.DecisionTree
    MLModel.Classes.Node
    MLModel.Classes.RandomForest
