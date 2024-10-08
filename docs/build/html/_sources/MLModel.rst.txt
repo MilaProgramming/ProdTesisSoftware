@@ -15,6 +15,8 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   MLModel.Correlation
+   MLModel.DataExplorer
    MLModel.Model
 
 Module contents

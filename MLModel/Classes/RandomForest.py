@@ -42,9 +42,28 @@ class RandomForest:
             El número mínimo de muestras requerido para realizar una división en un nodo.
         """
         self.num_trees = num_trees
-        self.max_depth = max_depth
+        
+        if max_depth is None:
+            self.max_depth = float('inf')
+        else:
+            self.max_depth = max_depth
+            
         self.min_samples_split = min_samples_split
         self.trees = []
+        
+    def get_params(self, deep=True):
+        """Get parameters for this estimator."""
+        return {
+            "num_trees": self.num_trees,
+            "max_depth": self.max_depth,
+            "min_samples_split": self.min_samples_split,
+        }
+
+    def set_params(self, **params):
+        """Set the parameters of this estimator."""
+        for key, value in params.items():
+            setattr(self, key, value)
+        return self
 
     def fit(self, X, y):
         """
@@ -100,3 +119,9 @@ class RandomForest:
         """
         tree_preds = np.array([tree.predict(X) for tree in self.trees])
         return np.apply_along_axis(lambda x: np.bincount(x).argmax(), axis=0, arr=tree_preds)
+    
+    def score(self, X, y):
+        """Calculate the accuracy of the model on the given data."""
+        predictions = self.predict(X)  # Get predictions
+        accuracy = np.mean(predictions == y)  # Calculate accuracy
+        return accuracy
