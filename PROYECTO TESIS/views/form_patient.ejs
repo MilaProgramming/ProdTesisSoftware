@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admisión de Paciente</title>
+</head>
+<body>
+    <h1>Admisión de Paciente</h1>
+
+    <form action="/validar" method="post">
+        Nombre: 
+        <input type="text" name="nombre" id="nombre"><br><br>
+
+        Apellido:
+        <input type="text" name="apellido" id="apellido"><br><br>
+
+        Edad:
+        <input type="number" name="edad" id="edad"><br><br>
+
+        Sexo:
+        <input type="text" name="sexo" id="sexo"><br><br>
+
+        ¿Cómo llegó el paciente?:
+        <input type="text" name="llegada_paciente" id="llegada_paciente"><br><br>
+
+        ¿Está el paciente herido?:
+        <input type="text" name="paciente_herido" id="paciente_herido"><br><br>
+
+        Estado mental del paciente:
+        <input type="text" name="estado_mental_paciente" id="estado_mental_paciente"><br><br>
+
+        ¿El paciente tiene dolor?:
+        <input type="text" name="dolor_paciente" id="dolor_paciente"><br><br>
+
+        Escala dolor (0-10):
+        <input type="number" name="escala_dolor" id="escala_dolor"><br><br>
+
+        Temperatura Corporal (C):
+        <input type="number" name="temperatura_corporal" id="temperatura_corporal"><br><br>
+
+        Presión Arterial Sistólica (mmHg):
+        <input type="number" name="presion_arterial_sistolica" id="presion_arterial_sistolica"><br><br>
+
+        Presión Arterial Diastolica (mmHg):
+        <input type="number" name="presion_arterial_diastolica" id="presion_arterial_diastolica"><br><br>
+
+        Frecuencia Cardiaca (bpm):
+        <input type="number" name="frecuencia_cardiaca" id="frecuencia_cardiaca"><br><br>
+
+        Tasa de Respiración (bpm):
+        <input type="number" name="tasa_respiracion" id="tasa_respiracion"><br><br>
+
+        <input type="submit" value="Añadir Paciente">
+    </form>
+</body>
+</html>
