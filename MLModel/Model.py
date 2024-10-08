@@ -31,11 +31,11 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 print(f"Training set size: {X_train.shape[0]}")
 print(f"Testing set size: {X_test.shape[0]}")
 
-smote = SMOTE(random_state=42, k_neighbors=3)
+smote = SMOTE(random_state=42, k_neighbors=4)
 X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
 
 # Step 4: Initialize the RandomForest model
-rf = RandomForest(num_trees=200, max_depth=10, min_samples_split=10)
+rf = RandomForest(num_trees=200, max_depth=15, min_samples_split=20)
 
 # Step 5: Cross-Validation (to check for overfitting/underfitting)
 print("\nRunning cross-validation...")
@@ -59,7 +59,7 @@ accuracy = accuracy_score(y_test, y_pred)
 print(f"Test Set Accuracy: {accuracy * 100:.2f}%")
 
 # Print classification report
-print("\nClassification Report:\n", classification_report(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred, zero_division=0))
 
 # 8.1: Identify misclassified samples
 misclassified_idx = np.where(y_test != y_pred)[0]  # Get the indices where predictions are wrong
@@ -67,11 +67,11 @@ print(f"Number of misclassified samples: {len(misclassified_idx)}")
 print(f"Misclassified indices: {misclassified_idx}")
 
 # Print out the misclassified samples (features and true/predicted labels)
-print("\nInspecting misclassified samples...")
-for idx in misclassified_idx:
-    print(f"Index: {idx}")
-    print(f"True label: {y_test[idx]}, Predicted label: {y_pred[idx]}")
-    print(f"Features: {X_test[idx]}\n")
+# print("\nInspecting misclassified samples...")
+# for idx in misclassified_idx:
+#     print(f"Index: {idx}")
+#     print(f"True label: {y_test[idx]}, Predicted label: {y_pred[idx]}")
+#     print(f"Features: {X_test[idx]}\n")
 
 # Optional: Test a single prediction
 print("\nTesting a single prediction...")
@@ -99,6 +99,9 @@ test_accuracy = rf.score(X_test, y_test)
 print(f"Training Set Accuracy: {train_accuracy * 100:.2f}%")
 print(f"Test Set Accuracy: {test_accuracy * 100:.2f}%")
 
+importances = rf.feature_importances_
+feature_importance = sorted(zip(importances, features), reverse=True)
+print("Feature importance ranking:", feature_importance)
 # Plot the learning curve
 plt.figure()
 plt.plot(train_sizes, train_mean, 'o-', color="r", label="Training score")
