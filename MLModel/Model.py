@@ -99,9 +99,6 @@ test_accuracy = rf.score(X_test, y_test)
 print(f"Training Set Accuracy: {train_accuracy * 100:.2f}%")
 print(f"Test Set Accuracy: {test_accuracy * 100:.2f}%")
 
-importances = rf.feature_importances_
-feature_importance = sorted(zip(importances, features), reverse=True)
-print("Feature importance ranking:", feature_importance)
 
 # Plot the learning curve
 plt.figure()

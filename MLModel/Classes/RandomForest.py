@@ -47,9 +47,7 @@ class RandomForest:
             self.max_depth = float('inf')
         else:
             self.max_depth = max_depth
-            
         self.min_samples_split = min_samples_split
-        self.feature_importances_ = None
         self.trees = []
         
     def get_params(self, deep=True):
@@ -78,20 +76,11 @@ class RandomForest:
             Las etiquetas correspondientes a los datos de entrada.
         """
         self.trees = []
-        n_features = X.shape[1] 
-        feature_importances = np.zeros(n_features)
         for _ in range(self.num_trees):
             tree = DecisionTree(max_depth=self.max_depth, min_samples_split=self.min_samples_split)
             X_sample, y_sample = self._bootstrap_sample(X, y)
             tree.fit(X_sample, y_sample)
             self.trees.append(tree)
-
-            # Aggregate the feature importances from each tree
-            tree.calculate_feature_importances(n_features)
-            feature_importances += tree.feature_importances_
-        
-        # Average the importances across all trees
-        self.feature_importances_ = feature_importances / self.num_trees
 
     def _bootstrap_sample(self, X, y):
         """
