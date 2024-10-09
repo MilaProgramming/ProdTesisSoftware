@@ -35,7 +35,7 @@ smote = SMOTE(random_state=42, k_neighbors=4)
 X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
 
 # Step 4: Initialize the RandomForest model
-rf = RandomForest(num_trees=200, max_depth=15, min_samples_split=20)
+rf = RandomForest(num_trees=100, max_depth=15, min_samples_split=20)
 
 # Step 5: Cross-Validation (to check for overfitting/underfitting)
 print("\nRunning cross-validation...")
@@ -102,6 +102,7 @@ print(f"Test Set Accuracy: {test_accuracy * 100:.2f}%")
 importances = rf.feature_importances_
 feature_importance = sorted(zip(importances, features), reverse=True)
 print("Feature importance ranking:", feature_importance)
+
 # Plot the learning curve
 plt.figure()
 plt.plot(train_sizes, train_mean, 'o-', color="r", label="Training score")
