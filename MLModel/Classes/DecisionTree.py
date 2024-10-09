@@ -125,6 +125,61 @@ class DecisionTree:
         right = self._build_tree(X[right_idxs, :], y[right_idxs], depth + 1)
         return Node(feature=best_feat, threshold=best_thresh, left=left, right=right)
 
+    def calculate_feature_importances(self):
+        """
+        Calcula la importancia de las características en función de la reducción de impureza (Gini).
+
+        Retorna
+        -------
+        importances : array
+            Un array que contiene la importancia de cada característica.
+        """
+        if self.root is None:
+            raise Exception("El árbol debe estar entrenado (fit) antes de calcular la importancia de las características.")
+
+        # Inicializamos un array para almacenar la importancia de cada característica
+        feature_importances = np.zeros(self.root.num_features)
+
+        # Recorremos el árbol y acumulamos la importancia de las características
+        self._accumulate_importances(self.root, feature_importances, 1.0)
+
+        # Normalizamos las importancias para que sumen a 1
+        feature_importances /= np.sum(feature_importances)
+        return feature_importances
+
+    def _accumulate_importances(self, node, feature_importances, weight):
+        """
+        Método auxiliar para acumular la importancia de las características recursivamente.
+
+        Parámetros
+        ----------
+        node : Node
+            El nodo actual en el árbol de decisión.
+        feature_importances : array
+            Un array donde se acumulan las importancias.
+        weight : float
+            El peso asociado con el nodo actual (la proporción de muestras que alcanzan este nodo).
+        """
+        # Si es un nodo hoja, no hacemos nada
+        if node.is_leaf_node():
+            return
+
+        # Calculamos la reducción de Gini del nodo
+        total_samples = node.num_samples
+        left_weight = len(node.left_samples) / total_samples
+        right_weight = len(node.right_samples) / total_samples
+        impurity_reduction = node.gini_impurity - (
+            left_weight * node.left_gini + right_weight * node.right_gini
+        )
+
+        # Acumulamos la reducción de impureza para la característica usada en este nodo
+        feature_importances[node.feature] += impurity_reduction * weight
+
+        # Llamamos recursivamente a los nodos hijo
+        self._accumulate_importances(node.left, feature_importances, left_weight * weight)
+        self._accumulate_importances(node.right, feature_importances, right_weight * weight)
+
+
     def _best_split(self, X, y, feat_idxs):
         """
         Encuentra la mejor división para un conjunto de datos dado en función de la impureza de Gini.
