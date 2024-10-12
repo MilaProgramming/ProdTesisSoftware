@@ -17,7 +17,7 @@ print("First 5 rows of the data:\n", data.head())
 
 # Step 2: Split data into features (X) and target (y)
 target_column = 'KTAS_expert'
-features = ['Sex', 'Age', 'Arrival mode', 'Injury', 'Mental', 'Pain', 'NRS_pain', 'SBP', 'DBP', 'HR', 'RR', 'BT', 'Saturation']
+features = ['Sex', 'Age', 'Injury', 'Mental', 'NRS_pain', 'SBP', 'DBP', 'HR', 'RR', 'BT', 'Saturation']
 X = data[features].values
 y = data[target_column].values
 
