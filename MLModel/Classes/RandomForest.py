@@ -1,6 +1,12 @@
 from .DecisionTree import DecisionTree
 import numpy as np
-from concurrent.futures import ProcessPoolExecutor
+import os
+from joblib import Parallel, delayed 
+from scipy.stats import mode
+import threading
+from tqdm import tqdm
+
+os.environ['LOKY_MAX_CPU_COUNT'] = '4'
 
 class RandomForest:
     """
@@ -77,14 +83,16 @@ class RandomForest:
             Las etiquetas correspondientes a los datos de entrada.
         """
         self.trees = []
+        total_trees = self.num_trees
 
-        # Use ProcessPoolExecutor for parallel tree training
-        with ProcessPoolExecutor() as executor:
-            # Create a list of future tasks
-            futures = [executor.submit(self._train_tree, X, y) for _ in range(self.num_trees)]
-            for future in futures:
-                tree = future.result()
-                self.trees.append(tree)
+        # Use joblib's Parallel and delayed for parallel tree training
+        self.trees = Parallel(n_jobs=-1)(
+            delayed(self._train_tree)(X, y) for _ in tqdm(range(total_trees), desc="Training Trees")
+        )
+
+        # Final completion message
+        print(f"All {total_trees} trees trained.")
+
 
     def _train_tree(self, X, y):
         """
@@ -142,7 +150,7 @@ class RandomForest:
             Un array con las etiquetas predichas para cada muestra en X.
         """
         tree_preds = np.array([tree.predict(X) for tree in self.trees])
-        return np.apply_along_axis(lambda x: np.bincount(x).argmax(), axis=0, arr=tree_preds)
+        return mode(tree_preds, axis=0)[0].flatten()
     
     def score(self, X, y):
         """Calculate the accuracy of the model on the given data."""
