@@ -110,9 +110,6 @@ def main():
     print(f"Predicted severity for this test case: {predicted_label[0]}")
     print(f"Actual severity for this test case: {y_test[0]}")
 
-    # Step 9: Plot the Learning Curve to check for Overfitting/Underfitting
-    print("\nGenerating learning curve...")
-
     train_sizes, train_scores, test_scores = learning_curve(
         rf, X_train_smote, y_train_smote, cv=5, scoring='accuracy', n_jobs=-1,
         train_sizes=np.linspace(0.1, 1.0, 5)
@@ -128,7 +125,20 @@ def main():
     test_accuracy = rf.score(X_test, y_test)
     print(f"Training Set Accuracy: {train_accuracy * 100:.2f}%")
     print(f"Test Set Accuracy: {test_accuracy * 100:.2f}%")
-
+    
+    # Plot the learning curve
+    plt.figure()
+    plt.plot(train_sizes, train_mean, 'o-', color="r", label="Training score")
+    plt.plot(train_sizes, test_mean, 'o-', color="g", label="Cross-validation score")
+    # Fill between standard deviations
+    plt.fill_between(train_sizes, train_mean - train_std, train_mean + train_std, alpha=0.1, color="r")
+    plt.fill_between(train_sizes, test_mean - test_std, test_mean + test_std, alpha=0.1, color="g")
+    plt.title('Learning Curve')
+    plt.xlabel('Training Size')
+    plt.ylabel('Accuracy')
+    plt.legend(loc="best")
+    plt.grid(True)
+    plt.show()
 
 if __name__ == "__main__":
     main()
