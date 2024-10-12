@@ -270,7 +270,7 @@ def main(file_path):
     print("Valores faltantes finales:")
     print(data.isnull().sum()[data.isnull().sum() > 0])
 
-    columns_to_remove = ['Chief_complain', 'Diagnosis in ED', 'Group', 'Patients number per hour', 'KTAS_RN', 'mistriage', 'Length of stay_min', 'KTAS duration_min', 'Error_group', 'Disposition']
+    columns_to_remove = ['Chief_complain', 'Diagnosis in ED', 'Group', 'Patients number per hour', 'KTAS_RN', 'mistriage', 'Length of stay_min', 'KTAS duration_min', 'Error_group', 'Disposition', 'Arrival mode', 'Pain']
     data = remove_columns(data, columns_to_remove)
     print(f"Se eliminaron las columnas: {columns_to_remove}")
 
