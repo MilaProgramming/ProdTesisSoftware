@@ -39,7 +39,7 @@ rf = RandomForest(num_trees=100, max_depth=15, min_samples_split=20)
 
 # Step 5: Cross-Validation (to check for overfitting/underfitting)
 print("\nRunning cross-validation...")
-cv_scores = cross_val_score(rf, X_train_smote, y_train_smote, cv=5)  # 5-fold cross-validation
+cv_scores = cross_val_score(rf, X_train_smote, y_train_smote, cv=5, n_jobs=-1)  # 5-fold cross-validation
 print(f"Cross-validation scores: {cv_scores}")
 print(f"Average cross-validation score: {np.mean(cv_scores):.2f}")
 

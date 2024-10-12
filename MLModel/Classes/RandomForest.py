@@ -1,5 +1,6 @@
 from .DecisionTree import DecisionTree
 import numpy as np
+from concurrent.futures import ProcessPoolExecutor
 
 class RandomForest:
     """
@@ -76,11 +77,35 @@ class RandomForest:
             Las etiquetas correspondientes a los datos de entrada.
         """
         self.trees = []
-        for _ in range(self.num_trees):
-            tree = DecisionTree(max_depth=self.max_depth, min_samples_split=self.min_samples_split)
-            X_sample, y_sample = self._bootstrap_sample(X, y)
-            tree.fit(X_sample, y_sample)
-            self.trees.append(tree)
+
+        # Use ProcessPoolExecutor for parallel tree training
+        with ProcessPoolExecutor() as executor:
+            # Create a list of future tasks
+            futures = [executor.submit(self._train_tree, X, y) for _ in range(self.num_trees)]
+            for future in futures:
+                tree = future.result()
+                self.trees.append(tree)
+
+    def _train_tree(self, X, y):
+        """
+        Entrena un único árbol de decisión en una muestra de bootstrap.
+
+        Parámetros
+        ----------
+        X : array
+            Las características del conjunto de datos de entrada.
+        y : array
+            Las etiquetas correspondientes a los datos de entrada.
+
+        Retorna
+        -------
+        tree : DecisionTree
+            El árbol de decisión entrenado.
+        """
+        tree = DecisionTree(max_depth=self.max_depth, min_samples_split=self.min_samples_split)
+        X_sample, y_sample = self._bootstrap_sample(X, y)
+        tree.fit(X_sample, y_sample)
+        return tree
 
     def _bootstrap_sample(self, X, y):
         """
