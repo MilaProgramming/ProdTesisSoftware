@@ -62,6 +62,19 @@ def round_and_convert_columns(df, columns_to_convert):
     
     return df
 
+# Function to reduce the number of decimals in specified columns to 2
+def reduce_decimals(df, columns_to_reduce):
+    # Loop through the specified columns
+    for column in columns_to_reduce:
+        # Check if the column is numeric
+        if pd.api.types.is_numeric_dtype(df[column]):
+            # Reduce the number of decimals to 2
+            df[column] = df[column].round(2)
+        else:
+            print(f"Column '{column}' is not numeric and cannot be modified.")
+    
+    return df
+
 # Example usage:
 file_path = './Data/final_dataset_cleaned.csv'
 df = clean_data(file_path)
@@ -77,8 +90,11 @@ convert_float_to_int64(df, 'KTAS_expert')
 # Apply the mapping and transformation
 df = map_and_convert_injury(df)
 
-columns_to_convert = ['SBP', 'DBP', 'HR', 'RR', 'BT', 'Saturation']
+columns_to_convert = ['SBP', 'DBP', 'HR', 'RR', 'Saturation']
 df = round_and_convert_columns(df, columns_to_convert)
+
+columns_decimals = ['BT']
+df = reduce_decimals(df, columns_decimals)
 
 # print results
 print(df.dtypes)

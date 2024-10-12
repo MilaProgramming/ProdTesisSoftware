@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 import statsmodels.api as sm
+from sklearn.preprocessing import StandardScaler
 
 def load_cleaned_data(file_path):
     """
@@ -117,6 +118,7 @@ def plot_feature_distributions(data):
     plt.suptitle("Distribuciones de Características Numéricas")
     plt.show()
 
+
 def check_data_suitability(data, target_column):
     """
     Revisa la idoneidad del conjunto de datos mediante una regresión logística multinomial.
@@ -128,6 +130,61 @@ def check_data_suitability(data, target_column):
     target_column : str
         La columna objetivo para la clasificación multinomial.
     """
+    # Verificar y eliminar columnas constantes
+    constant_columns = data.columns[data.nunique() <= 1]
+    data = data.drop(columns=constant_columns)
+    if len(constant_columns) > 0:
+        print(f"Se eliminaron las siguientes columnas constantes: {constant_columns.tolist()}")
+
+    # Verificar valores faltantes y eliminar filas con NaN
+    if data.isnull().any().any():
+        print("Se encontraron valores faltantes. Se eliminarán filas con NaN.")
+        data = data.dropna()
+
+    # Escoger las características numéricas
+    numeric_columns = data.select_dtypes(include=[np.number]).columns.tolist()
+    numeric_columns.remove(target_column)
+
+    # Crear las variables independientes (X) y la variable objetivo (y)
+    X = data[numeric_columns]
+    y = data[target_column]
+
+    # Escalar características
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # Agregar una constante a X (para la intersección)
+    X_scaled = sm.add_constant(X_scaled)
+
+    # Utilizar MNLogit para regresión logística multinomial
+    try:
+        model = sm.MNLogit(y, X_scaled).fit()
+        print("\nResultados del modelo de Regresión Logística Multinomial:")
+        print(model.summary())
+    except Exception as e:
+        print("Error durante el ajuste del modelo:", e)
+
+    """
+    Revisa la idoneidad del conjunto de datos mediante una regresión logística multinomial.
+
+    Parámetros
+    ----------
+    data : pd.DataFrame
+        El conjunto de datos a analizar.
+    target_column : str
+        La columna objetivo para la clasificación multinomial.
+    """
+    # Verificar y eliminar columnas constantes
+    constant_columns = data.columns[data.nunique() <= 1]
+    data = data.drop(columns=constant_columns)
+    if len(constant_columns) > 0:
+        print(f"Se eliminaron las siguientes columnas constantes: {constant_columns.tolist()}")
+
+    # Verificar valores faltantes y eliminar filas con NaN
+    if data.isnull().any().any():
+        print("Se encontraron valores faltantes. Se eliminarán filas con NaN.")
+        data = data.dropna()
+
     # Escoger las características numéricas
     numeric_columns = data.select_dtypes(include=[np.number]).columns.tolist()
     numeric_columns.remove(target_column)
@@ -137,15 +194,13 @@ def check_data_suitability(data, target_column):
     y = data[target_column]
     
     # Agregar una constante a X (para la intersección)
-    X = sm.add_constant(X)  
-    
+    X = sm.add_constant(X)
+
     # Utilizar MNLogit para regresión logística multinomial
     model = sm.MNLogit(y, X).fit()
 
     print("\nResultados del modelo de Regresión Logística Multinomial:")
     print(model.summary())
-
-
 
 def main(file_path):
     """
@@ -172,12 +227,12 @@ def main(file_path):
 
     # Verificar la importancia de las características con Bosque Aleatorio
     target_column = 'KTAS_expert'  # Columna objetivo
-    features = ['Sex', 'Age', 'Arrival mode', 'Injury', 'Mental', 'Pain', 'NRS_pain', 'SBP', 'DBP', 'HR', 'RR', 'BT', 'Saturation']  # Características para le analisis
+    features = ['Sex', 'Age', 'Injury', 'Mental', 'NRS_pain', 'SBP', 'DBP', 'HR', 'RR', 'BT', 'Saturation']  # Características para le analisis
     check_feature_importance(data, target_column, features)
 
     # Verificar idoneidad del conjunto de datos
     check_data_suitability(data, target_column)
 
 if __name__ == "__main__":
-    file_path = './Data/training_data.csv'  # Ruta del archivo de datos limpio
+    file_path = './Data/new_training_data.csv'  # Ruta del archivo de datos limpio
     main(file_path)
