@@ -1,10 +1,9 @@
 from Classes.RandomForest import RandomForest
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split, cross_val_score, learning_curve
+from sklearn.model_selection import train_test_split, learning_curve
 from sklearn.metrics import accuracy_score, classification_report
 import matplotlib.pyplot as plt
-from imblearn.over_sampling import SMOTE
 
 def reduce_dataset(X, y, sample_size):
     """
@@ -35,6 +34,11 @@ def reduce_dataset(X, y, sample_size):
     
     return X_subset, y_subset
 
+def reset_model(rf):
+    """Reset model to allow retraining during cross-validation."""
+    rf.is_trained = False
+    return rf
+
 def main():
     # Step 1: Load the cleaned CSV Data
     print("Loading cleaned CSV data...")
@@ -43,19 +47,21 @@ def main():
     # Display shape and first few rows
     print(f"Data shape: {data.shape}")
     print("First 5 rows of the data:\n", data.head())
+    
+    original_dataset_size = 144810
+    trained_dataset_size = 144810
 
     # Step 2: Split data into features (X) and target (y)
     target_column = 'KTAS_expert'
     features = ['Sex', 'Age', 'Injury', 'Mental', 'NRS_pain', 'SBP', 'DBP', 'HR', 'RR', 'BT', 'Saturation']
-    X = data[features].values
-    y = data[target_column].values
+    Xo = data[features].values
+    yo = data[target_column].values
 
-    print(f"\nFeatures (X) shape: {X.shape}")
-    print(f"Target (y) shape: {y.shape}")
+    print(f"\nFeatures (X) shape: {Xo.shape}")
+    print(f"Target (y) shape: {yo.shape}")
     
     # Step 3: Reduce dataset size (optional step)
-    sample_size = 10000  # Set the desired sample size
-    X, y = reduce_dataset(X, y, sample_size)
+    X, y = reduce_dataset(Xo, yo, trained_dataset_size)
     
     print(f"\nReduced Features (X) shape: {X.shape}")
     print(f"Reduced Target (y) shape: {y.shape}")
@@ -67,15 +73,12 @@ def main():
     print(f"Training set size: {X_train.shape[0]}")
     print(f"Testing set size: {X_test.shape[0]}")
 
-    smote = SMOTE(random_state=42, k_neighbors=2)
-    X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
-
     # Step 4: Initialize the RandomForest model
     rf = RandomForest(num_trees=100, max_depth=15, min_samples_split=20)
 
     # Step 6: Fit the model on the full training set
     print("\nTraining the model on the full training set...")
-    rf.fit(X_train_smote, y_train_smote)
+    rf.fit(X_train, y_train)
 
     # Step 7: Make predictions on the test set
     print("\nMaking predictions on the test set...")
@@ -109,9 +112,28 @@ def main():
     predicted_label = rf.predict(np.array([sample_patient]))
     print(f"Predicted severity for this test case: {predicted_label[0]}")
     print(f"Actual severity for this test case: {y_test[0]}")
+    
+    print("\nTesting another prediction, this time with a different test case...")
+    # Use the original dataset, with a random number from 0 to 400000 to pick a case and check the prediction
+    for i in range(5):
+        random_index = np.random.randint(0, original_dataset_size)  # Select from the original dataset
+        sample_patient = Xo[random_index]  # Fetching from the original dataset
+        predicted_label = rf.predict(np.array([sample_patient]))
+        
+        # If you want the actual severity from the original dataset
+        actual_label = yo[random_index]  # Access the label from the original dataset
+        
+        print(f"Predicted severity for this test case: {predicted_label[0]}")
+        print(f"Actual severity for this test case: {actual_label}")
+        print(f"Features: {sample_patient}\n")
+    
+    #Size of the training set
+    print(f"Training set size: {X_train.shape[0]}")
 
+    print("\nGenerating learning curve...")
     train_sizes, train_scores, test_scores = learning_curve(
-        rf, X_train_smote, y_train_smote, cv=5, scoring='accuracy', n_jobs=-1,
+        reset_model(RandomForest(num_trees=100, max_depth=15, min_samples_split=20)),
+        X_train, y_train, cv=5, scoring='accuracy', n_jobs=-1,
         train_sizes=np.linspace(0.1, 1.0, 5)
     )
 
@@ -121,7 +143,7 @@ def main():
     test_mean = np.mean(test_scores, axis=1)
     test_std = np.std(test_scores, axis=1)
 
-    train_accuracy = rf.score(X_train_smote, y_train_smote)
+    train_accuracy = rf.score(X_train, y_train)
     test_accuracy = rf.score(X_test, y_test)
     print(f"Training Set Accuracy: {train_accuracy * 100:.2f}%")
     print(f"Test Set Accuracy: {test_accuracy * 100:.2f}%")

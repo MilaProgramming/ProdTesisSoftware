@@ -106,7 +106,6 @@ class DecisionTree:
         # Stopping conditions
         if depth >= self.max_depth or num_samples < self.min_samples_split or num_labels == 1:
             leaf_value = self._most_common_label(y)
-            print(f"Creating leaf node at depth {depth} with value: {leaf_value}")
             return Node(value=leaf_value)
 
         # Select random feature indices
@@ -118,7 +117,7 @@ class DecisionTree:
         # If no valid split is found, create a leaf node
         if best_feat is None or best_thresh is None:
             leaf_value = self._most_common_label(y)
-            print(f"Creating leaf node at depth {depth} with value: {leaf_value}")
+
             return Node(value=leaf_value)
 
         # Split data and recurse
@@ -126,8 +125,6 @@ class DecisionTree:
         left = self._build_tree(X[left_idxs, :], y[left_idxs], depth + 1)
         right = self._build_tree(X[right_idxs, :], y[right_idxs], depth + 1)
         
-        # Print the created node information
-        print(f"Creating node at depth {depth} with feature index: {best_feat}, threshold: {best_thresh}")
         return Node(feature=best_feat, threshold=best_thresh, left=left, right=right)
 
     def _best_split(self, X, y, feat_idxs):

@@ -3,8 +3,6 @@ import numpy as np
 import os
 from joblib import Parallel, delayed 
 from scipy.stats import mode
-import threading
-from tqdm import tqdm
 
 os.environ['LOKY_MAX_CPU_COUNT'] = '4'
 
@@ -56,6 +54,7 @@ class RandomForest:
             self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.trees = []
+        self.is_trained = False 
         
     def get_params(self, deep=True):
         """Get parameters for this estimator."""
@@ -82,16 +81,15 @@ class RandomForest:
         y : array
             Las etiquetas correspondientes a los datos de entrada.
         """
-        self.trees = []
-        total_trees = self.num_trees
-
-        # Use joblib's Parallel and delayed for parallel tree training
-        self.trees = Parallel(n_jobs=-1)(
-            delayed(self._train_tree)(X, y) for _ in tqdm(range(total_trees), desc="Training Trees")
-        )
-
-        # Final completion message
-        print(f"All {total_trees} trees trained.")
+        if not self.is_trained:  # Only train if not already trained
+            print("Starting training...")
+            self.trees = Parallel(n_jobs=-1)(
+                delayed(self._train_tree)(X, y) for _ in range(self.num_trees)
+            )
+            self.is_trained = True  # Set flag to prevent retraining
+            print(f"All {self.num_trees} trees trained.")
+        else:
+            print("Model is already trained.")
 
 
     def _train_tree(self, X, y):
