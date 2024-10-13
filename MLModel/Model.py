@@ -49,7 +49,7 @@ def main():
     print("First 5 rows of the data:\n", data.head())
     
     original_dataset_size = 144810
-    trained_dataset_size = 144810
+    trained_dataset_size = 144809
 
     # Step 2: Split data into features (X) and target (y)
     target_column = 'KTAS_expert'
