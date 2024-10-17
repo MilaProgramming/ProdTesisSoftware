@@ -99,13 +99,6 @@ def main():
     print(f"Number of misclassified samples: {len(misclassified_idx)}")
     print(f"Misclassified indices: {misclassified_idx}")
 
-    # # Print out the misclassified samples (features and true/predicted labels)
-    # print("\nInspecting misclassified samples...")
-    # for idx in misclassified_idx:
-    #     print(f"Index: {idx}")
-    #     print(f"True label: {y_test[idx]}, Predicted label: {y_pred[idx]}")
-    #     print(f"Features: {X_test[idx]}\n")
-
     # Optional: Test a single prediction
     print("\nTesting a single prediction...")
     sample_patient = X_test[0]

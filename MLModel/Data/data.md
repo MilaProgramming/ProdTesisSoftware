@@ -12,7 +12,7 @@ A continuación se describen las variables contenidas en el conjunto de datos:
 - **Edad**: Edad del paciente.
 - **Lesión**: Indica si el paciente está lesionado o no.
 - **Estado mental**: Estado mental del paciente.
-- **Dolor**: Indica si el paciente tiene dolor.
+- **Dolor**: Indica si el paciente tiene dolor, va del 0 al 10
 - **NRS_pain**: Evaluación del dolor realizada por el personal de enfermería.
 - **Presión sistólica (SBP)**: Presión arterial sistólica.
 - **Presión diastólica (DBP)**: Presión arterial diastólica.
@@ -24,10 +24,11 @@ A continuación se describen las variables contenidas en el conjunto de datos:
 
 En el documento técnico del proyecto, se observó que algunos datos numéricos son en realidad categóricos. A continuación, se describen estos valores:
 
-- **Existencia de lesión (Injury)**:
+- **Parametros de lesión (Injury)**:
 
-  - `1`: No.
-  - `2`: Sí.
+  - `0`: No existencia
+  - `1`: Existencia no grave
+  - `2`: Existencia grave
 
 - **Género (Sex)**:
 
