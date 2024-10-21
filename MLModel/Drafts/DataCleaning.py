@@ -198,6 +198,7 @@ def convert_object_to_numeric(data):
     pd.DataFrame
         El conjunto de datos con las columnas convertidas.
     """
+    print(data.dtypes)
     for column in data.select_dtypes(include=['object']).columns:
         if data[column].str.contains(r'\,').any():
             data[column] = data[column].str.replace(',', '.')

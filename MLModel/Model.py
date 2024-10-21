@@ -7,130 +7,140 @@ import matplotlib.pyplot as plt
 
 def reduce_dataset(X, y, sample_size):
     """
-    Reduces the size of the dataset by randomly selecting a subset of samples.
-    
-    Parameters:
-    ----------
+    Reduce el tamaño del conjunto de datos seleccionando aleatoriamente una muestra de instancias.
+
+    Parámetros:
+    -----------
     X : array
-        The feature dataset.
+        Conjunto de datos de características.
     y : array
-        The labels corresponding to the dataset.
+        Etiquetas correspondientes al conjunto de datos.
     sample_size : int
-        The number of samples you want to keep in the reduced dataset.
-    
-    Returns:
-    -------
+        El número de muestras que se desean mantener en el conjunto reducido.
+
+    Retorna:
+    --------
     X_subset, y_subset : arrays
-        The reduced feature dataset and corresponding labels.
+        El conjunto de datos reducido y las etiquetas correspondientes.
     """
-    assert sample_size <= X.shape[0], "Sample size cannot exceed the size of the dataset"
+    assert sample_size <= X.shape[0], "El tamaño de la muestra no puede exceder el tamaño del conjunto de datos."
     
-    # Get a random sample of indices
+    # Seleccionar aleatoriamente un subconjunto de índices
     indices = np.random.choice(X.shape[0], sample_size, replace=False)
     
-    # Select the samples
-    X_subset = X[indices]
-    y_subset = y[indices]
-    
-    return X_subset, y_subset
+    # Retornar el subconjunto de datos y etiquetas
+    return X[indices], y[indices]
 
 def reset_model(rf):
-    """Reset model to allow retraining during cross-validation."""
+    """
+    Reinicia el modelo para permitir un nuevo entrenamiento durante la validación cruzada.
+    
+    Parámetros:
+    -----------
+    rf : RandomForest
+        El modelo RandomForest que se reiniciará.
+
+    Retorna:
+    --------
+    rf : RandomForest
+        El modelo reiniciado.
+    """
     rf.is_trained = False
     return rf
 
 def main():
-    # Step 1: Load the cleaned CSV Data
-    print("Loading cleaned CSV data...")
+    """
+    Función principal para cargar los datos, reducir el conjunto, entrenar el modelo y evaluarlo.
+    También genera una curva de aprendizaje visualizando la precisión del modelo en varios tamaños de entrenamiento.
+    """
+    # Paso 1: Cargar los datos limpios desde el archivo CSV
+    print("Cargando los datos del CSV limpio...")
     data = pd.read_csv('./Data/new_training_data.csv')
 
-    # Display shape and first few rows
-    print(f"Data shape: {data.shape}")
-    print("First 5 rows of the data:\n", data.head())
+    # Mostrar el tamaño y las primeras filas del conjunto de datos
+    print(f"Tamaño de los datos: {data.shape}")
+    print("Primeras 5 filas del conjunto de datos:\n", data.head())
     
     original_dataset_size = 144810
     trained_dataset_size = 144809
 
-    # Step 2: Split data into features (X) and target (y)
+    # Paso 2: Dividir los datos en características (X) y etiquetas (y)
     target_column = 'KTAS_expert'
     features = ['Sex', 'Age', 'Injury', 'Mental', 'NRS_pain', 'SBP', 'DBP', 'HR', 'RR', 'BT', 'Saturation']
     Xo = data[features].values
     yo = data[target_column].values
 
-    print(f"\nFeatures (X) shape: {Xo.shape}")
-    print(f"Target (y) shape: {yo.shape}")
+    print(f"\nTamaño de las características (X): {Xo.shape}")
+    print(f"Tamaño del objetivo (y): {yo.shape}")
     
-    # Step 3: Reduce dataset size (optional step)
+    # Paso 3: Reducir el tamaño del conjunto de datos
     X, y = reduce_dataset(Xo, yo, trained_dataset_size)
     
-    print(f"\nReduced Features (X) shape: {X.shape}")
-    print(f"Reduced Target (y) shape: {y.shape}")
+    print(f"\nTamaño reducido de las características (X): {X.shape}")
+    print(f"Tamaño reducido del objetivo (y): {y.shape}")
 
-    # Step 3: Split data into training and testing sets (80% training, 20% testing)
-    print("\nSplitting data into training and testing sets...")
+    # Paso 4: Dividir los datos en conjuntos de entrenamiento y prueba (80% entrenamiento, 20% prueba)
+    print("\nDividiendo los datos en conjuntos de entrenamiento y prueba...")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    print(f"Training set size: {X_train.shape[0]}")
-    print(f"Testing set size: {X_test.shape[0]}")
+    print(f"Tamaño del conjunto de entrenamiento: {X_train.shape[0]}")
+    print(f"Tamaño del conjunto de prueba: {X_test.shape[0]}")
 
-    # Step 4: Initialize the RandomForest model
+    # Paso 5: Inicializar el modelo RandomForest
     rf = RandomForest(num_trees=100, max_depth=15, min_samples_split=20)
 
-    # Step 6: Fit the model on the full training set
-    print("\nTraining the model on the full training set...")
+    # Paso 6: Entrenar el modelo con el conjunto de entrenamiento
+    print("\nEntrenando el modelo con el conjunto de entrenamiento completo...")
     rf.fit(X_train, y_train)
 
-    # Step 7: Make predictions on the test set
-    print("\nMaking predictions on the test set...")
+    # Paso 7: Hacer predicciones sobre el conjunto de prueba
+    print("\nRealizando predicciones sobre el conjunto de prueba...")
     y_pred = rf.predict(X_test)
 
-    # Step 8: Evaluate the model
-    print("\nEvaluating the model...")
+    # Paso 8: Evaluar el modelo
+    print("\nEvaluando el modelo...")
 
-    # Print accuracy
+    # Imprimir precisión
     accuracy = accuracy_score(y_test, y_pred)
-    print(f"Test Set Accuracy: {accuracy * 100:.2f}%")
+    print(f"Precisión del conjunto de prueba: {accuracy * 100:.2f}%")
 
-    # Print classification report
-    print("\nClassification Report:\n", classification_report(y_test, y_pred, zero_division=0))
+    # Imprimir informe de clasificación
+    print("\nInforme de clasificación:\n", classification_report(y_test, y_pred, zero_division=0))
 
-    # 8.1: Identify misclassified samples
-    misclassified_idx = np.where(y_test != y_pred)[0]  # Get the indices where predictions are wrong
-    print(f"Number of misclassified samples: {len(misclassified_idx)}")
-    print(f"Misclassified indices: {misclassified_idx}")
+    # Paso 8.1: Identificar las muestras mal clasificadas
+    misclassified_idx = np.where(y_test != y_pred)[0]
+    print(f"Número de muestras mal clasificadas: {len(misclassified_idx)}")
+    print(f"Índices de las muestras mal clasificadas: {misclassified_idx}")
 
-    # Optional: Test a single prediction
-    print("\nTesting a single prediction...")
+    # Paso opcional: Probar una predicción individual
+    print("\nProbando una predicción individual...")
     sample_patient = X_test[0]
     predicted_label = rf.predict(np.array([sample_patient]))
-    print(f"Predicted severity for this test case: {predicted_label[0]}")
-    print(f"Actual severity for this test case: {y_test[0]}")
+    print(f"Severidad predicha para este caso de prueba: {predicted_label[0]}")
+    print(f"Severidad real para este caso de prueba: {y_test[0]}")
     
-    print("\nTesting another prediction, this time with a different test case...")
-    # Use the original dataset, with a random number from 0 to 400000 to pick a case and check the prediction
+    print("\nProbando otra predicción con un caso de prueba diferente...")
+    # Seleccionar un caso aleatorio del conjunto original y realizar una predicción
     for i in range(5):
-        random_index = np.random.randint(0, original_dataset_size)  # Select from the original dataset
-        sample_patient = Xo[random_index]  # Fetching from the original dataset
+        random_index = np.random.randint(0, original_dataset_size)
+        sample_patient = Xo[random_index]
         predicted_label = rf.predict(np.array([sample_patient]))
-        
-        # If you want the actual severity from the original dataset
-        actual_label = yo[random_index]  # Access the label from the original dataset
-        
-        print(f"Predicted severity for this test case: {predicted_label[0]}")
-        print(f"Actual severity for this test case: {actual_label}")
-        print(f"Features: {sample_patient}\n")
+        actual_label = yo[random_index]
+        print(f"Severidad predicha para este caso: {predicted_label[0]}")
+        print(f"Severidad real para este caso: {actual_label}")
+        print(f"Características: {sample_patient}\n")
     
-    #Size of the training set
-    print(f"Training set size: {X_train.shape[0]}")
+    print(f"Tamaño del conjunto de entrenamiento: {X_train.shape[0]}")
 
-    print("\nGenerating learning curve...")
+    # Paso 9: Generar la curva de aprendizaje
+    print("\nGenerando curva de aprendizaje...")
     train_sizes, train_scores, test_scores = learning_curve(
         reset_model(RandomForest(num_trees=100, max_depth=15, min_samples_split=20)),
         X_train, y_train, cv=5, scoring='accuracy', n_jobs=-1,
         train_sizes=np.linspace(0.1, 1.0, 5)
     )
 
-    # Calculate mean and standard deviation for training and test sets
+    # Calcular la media y desviación estándar de los conjuntos de entrenamiento y prueba
     train_mean = np.mean(train_scores, axis=1)
     train_std = np.std(train_scores, axis=1)
     test_mean = np.mean(test_scores, axis=1)
@@ -138,19 +148,18 @@ def main():
 
     train_accuracy = rf.score(X_train, y_train)
     test_accuracy = rf.score(X_test, y_test)
-    print(f"Training Set Accuracy: {train_accuracy * 100:.2f}%")
-    print(f"Test Set Accuracy: {test_accuracy * 100:.2f}%")
+    print(f"Precisión del conjunto de entrenamiento: {train_accuracy * 100:.2f}%")
+    print(f"Precisión del conjunto de prueba: {test_accuracy * 100:.2f}%")
     
-    # Plot the learning curve
+    # Graficar la curva de aprendizaje
     plt.figure()
-    plt.plot(train_sizes, train_mean, 'o-', color="r", label="Training score")
-    plt.plot(train_sizes, test_mean, 'o-', color="g", label="Cross-validation score")
-    # Fill between standard deviations
+    plt.plot(train_sizes, train_mean, 'o-', color="r", label="Precisión en entrenamiento")
+    plt.plot(train_sizes, test_mean, 'o-', color="g", label="Precisión en validación cruzada")
     plt.fill_between(train_sizes, train_mean - train_std, train_mean + train_std, alpha=0.1, color="r")
     plt.fill_between(train_sizes, test_mean - test_std, test_mean + test_std, alpha=0.1, color="g")
-    plt.title('Learning Curve')
-    plt.xlabel('Training Size')
-    plt.ylabel('Accuracy')
+    plt.title('Curva de aprendizaje')
+    plt.xlabel('Tamaño de entrenamiento')
+    plt.ylabel('Precisión')
     plt.legend(loc="best")
     plt.grid(True)
     plt.show()

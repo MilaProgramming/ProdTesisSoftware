@@ -29,10 +29,10 @@ print(saturation_correlation)
 
 # Plotting the correlation with Saturation
 plt.figure(figsize=(10, 6))
-saturation_correlation.plot(kind='bar', color='skyblue')
-plt.title('Correlation of Selected Features with Saturation', fontsize=16)
-plt.xlabel('Features', fontsize=14)
-plt.ylabel('Correlation Coefficient', fontsize=14)
+saturation_correlation.plo(kind='bar', color='skyblue')
+plt.title('Correlación de las características con Saturation', fontsize=16)
+plt.xlabel('Características', fontsize=14)
+plt.ylabel('Coeficiente de Correlación', fontsize=14)
 plt.axhline(0, color='gray', linewidth=0.8, linestyle='--')  # Add a line at y=0 for reference
 plt.xticks(rotation=45, fontsize=12)
 plt.tight_layout()  # Adjust layout to prevent clipping

@@ -12,8 +12,7 @@ A continuación se describen las variables contenidas en el conjunto de datos:
 - **Edad**: Edad del paciente.
 - **Lesión**: Indica si el paciente está lesionado o no.
 - **Estado mental**: Estado mental del paciente.
-- **Dolor**: Indica si el paciente tiene dolor, va del 0 al 10
-- **NRS_pain**: Evaluación del dolor realizada por el personal de enfermería.
+- **NRS_pain**: Evaluación del dolor realizada por el personal de enfermería, va del 0 al 10
 - **Presión sistólica (SBP)**: Presión arterial sistólica.
 - **Presión diastólica (DBP)**: Presión arterial diastólica.
 - **Frecuencia cardíaca (HR)**: Frecuencia cardíaca.

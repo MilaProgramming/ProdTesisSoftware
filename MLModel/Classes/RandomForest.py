@@ -49,26 +49,47 @@ class RandomForest:
         self.num_trees = num_trees
         
         if max_depth is None:
-            self.max_depth = float('inf')
+            self.max_depth = float('inf') 
         else:
             self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.trees = []
         self.is_trained = False 
         
-    def get_params(self, deep=True):
-        """Get parameters for this estimator."""
+    def get_params(self):
+        """
+        Obtiene los parámetros de este estimador.
+
+        Retorna
+        -------
+        dict
+            Un diccionario con los parámetros del estimador, incluyendo 'num_trees', 'max_depth' y 'min_samples_split'.
+        """
         return {
             "num_trees": self.num_trees,
             "max_depth": self.max_depth,
             "min_samples_split": self.min_samples_split,
         }
 
+
     def set_params(self, **params):
-        """Set the parameters of this estimator."""
+        """
+        Establece los parámetros de este estimador.
+
+        Parámetros
+        ----------
+        **params : dict
+            Un diccionario de parámetros donde las claves son los nombres de los atributos y los valores son los valores a establecer.
+
+        Retorna
+        -------
+        self
+            Retorna el propio objeto para permitir el encadenamiento de métodos.
+        """
         for key, value in params.items():
             setattr(self, key, value)
         return self
+
 
     def fit(self, X, y):
         """
@@ -87,9 +108,9 @@ class RandomForest:
                 delayed(self._train_tree)(X, y) for _ in range(self.num_trees)
             )
             self.is_trained = True  # Set flag to prevent retraining
-            print(f"All {self.num_trees} trees trained.")
+            print(f"Los {self.num_trees} árboles han sido entrenados.")
         else:
-            print("Model is already trained.")
+            print("El modelo ya fue entrenado.")
 
 
     def _train_tree(self, X, y):
@@ -151,7 +172,22 @@ class RandomForest:
         return mode(tree_preds, axis=0)[0].flatten()
     
     def score(self, X, y):
-        """Calculate the accuracy of the model on the given data."""
-        predictions = self.predict(X)  # Get predictions
-        accuracy = np.mean(predictions == y)  # Calculate accuracy
+        """
+        Calcula la precisión del modelo utilizando las muestras de entrada y las etiquetas verdaderas.
+
+        Parámetros
+        ----------
+        X : array
+            Las características de las muestras de entrada.
+        y : array
+            Las etiquetas verdaderas correspondientes a las muestras de entrada.
+
+        Retorna
+        -------
+        float
+            La precisión del modelo, es decir, la proporción de predicciones correctas sobre el total de muestras.
+        """
+        predictions = self.predict(X)
+        accuracy = np.mean(predictions == y)
         return accuracy
+
