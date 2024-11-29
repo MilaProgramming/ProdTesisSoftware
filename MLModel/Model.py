@@ -112,7 +112,7 @@ def main():
     print(f"Número de muestras mal clasificadas: {len(misclassified_idx)}")
     print(f"Índices de las muestras mal clasificadas: {misclassified_idx}")
 
-    # Paso opcional: Probar una predicción individual
+    # Probar una predicción individual
     print("\nProbando una predicción individual...")
     sample_patient = X_test[0]
     predicted_label = rf.predict(np.array([sample_patient]))

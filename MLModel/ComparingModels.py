@@ -97,7 +97,7 @@ def main():
     # Dividir el conjunto de datos en entrenamiento y prueba
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    # Ecalar los datos para SVC y regresión logística
+    # Escalar los datos para SVC y regresión l
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
