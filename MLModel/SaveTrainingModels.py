@@ -70,7 +70,8 @@ def main():
     ]
 
     for model, filename in models:
-        train_and_save_model(model, X_train, X_test, y_train, y_test, filename)
+        train_and_save_model(model, X_train, y_train, X_test, y_test, filename)
+
 
     print("Todos los modelos han sido entrenados y guardados con éxito.\n")
 
