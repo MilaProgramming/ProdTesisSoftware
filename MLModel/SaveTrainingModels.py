@@ -16,18 +16,8 @@ def reduce_dataset(X, y, sample_size):
     print("Reducción completa.")
     return X[indices], y[indices]
 
-def test_model(model, X_train, y_train, X_test, y_test):
-    print(f"\nEntrenando el modelo {model.__class__.__name__}...")
-    model.fit(X_train, y_train)
-    print(f"Modelo {model.__class__.__name__} entrenado.")
-    
-    print(f"\nEvaluando el modelo {model.__class__.__name__}...")
-    y_pred = model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    print(f"Precisión en el conjunto de prueba: {accuracy * 100:.2f}%")
-    print(f"\nInforme de clasificación:\n{classification_report(y_test, y_pred, zero_division=0)}")
 
-def train_and_save_model(model, X_train, y_train, filename):
+def train_and_save_model(model, X_train, y_train, X_test, y_test, filename):
     """
     Entrena el modelo y lo guarda en un archivo .pkl.
     """
@@ -38,6 +28,11 @@ def train_and_save_model(model, X_train, y_train, filename):
     
     elapsed_time = time.time() - start_time
     print(f"Modelo {model.__class__.__name__} entrenado en {elapsed_time:.2f} segundos.")
+    
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"Precisión en el conjunto de prueba: {accuracy * 100:.2f}%")
+    print(f"\nInforme de clasificación:\n{classification_report(y_test, y_pred, zero_division=0)}")
     
     print(f"Guardando el modelo en '{filename}'...")
     joblib.dump(model, filename)
@@ -75,7 +70,7 @@ def main():
     ]
 
     for model, filename in models:
-        train_and_save_model(model, X_train, y_train, filename)
+        train_and_save_model(model, X_train, X_test, y_train, y_test, filename)
 
     print("Todos los modelos han sido entrenados y guardados con éxito.\n")
 
