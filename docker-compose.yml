@@ -1,0 +1,7 @@
+services:
+  tesis-model-service:
+    image: beemila666/tesis-model:latest
+    container_name: tesis_model_container
+    ports:
+      - "5000:5000"
+    restart: always
