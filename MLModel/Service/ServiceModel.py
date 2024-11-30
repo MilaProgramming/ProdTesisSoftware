@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
 import joblib
 import numpy as np
+from flask_cors import CORS
 
 # Initialize Flask app
 app = Flask(__name__)
+CORS(app)
 
 # Load the pre-trained models
 gradient_boosting_model = joblib.load("gradient_boosting_model.pkl")

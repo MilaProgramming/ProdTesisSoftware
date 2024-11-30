@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Install the necessary dependencies directly in the Dockerfile
-RUN pip install --no-cache-dir flask numpy scikit-learn joblib
+RUN pip install --no-cache-dir flask numpy scikit-learn joblib flask-cors
 
 # Expose port 5000 for the Flask app
 EXPOSE 5000
