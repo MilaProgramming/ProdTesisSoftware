@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" integrity="sha384-dpuaG1suU0eT09tx5plTaGMLBsfDLzUCCUXOY2j/LSvXYuG6Bqs43ALlhIqAJVRb" crossorigin="anonymous">
+    <!-- BoxIcons CSS -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <title>Sistema Integrado de Salud Universidad de las Fuerzas Armadas ESPE</title>
+    <style>
+        body {
+            background-image: url('/images/campus.jpg'); /* Fondo de la página */
+            background-size: cover; /* Ajustar la imagen de fondo */
+            background-position: center; /* Centrar la imagen de fondo */
+        }
+
+        h1 {
+            color: #277854;
+            text-align: center;
+        }
+
+        .form-label {
+            color: #277854;
+        }
+
+        .btn-primary {
+            background-color: #277854;
+            border-color: #277854;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d5e43;
+            border-color: #1d5e43;
+        }
+
+        .form-control {
+            border: 1px solid #277854;
+        }
+
+        .submit-btn {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+                margin-top: 30px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+
+        /* Custom styles for table */
+        .table-container {
+            width: 100%; /* Ancho completo del contenedor */
+            padding: 20px; /* Espaciado interno opcional */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra opcional para dar profundidad */
+        }
+
+        .table {
+            width: 100%; /* Asegura que la tabla use el 100% del ancho del contenedor */
+            margin-top: 20px; /* Espaciado superior para separar de otros elementos */
+        }
+
+        .table th {
+            background-color: #277854;
+            color: white;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        .btn-outline-primary {
+            border-color: #277854;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #1d5e43;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg" style="background-color: #277854;">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/" style="color: #ffffff;">
+                <img src="/images/logo_espe_med.png" alt="Logo" style="width: 40px; height: auto; margin-right: 10px;">
+                Sistema Integrado de Salud Universidad de las Fuerzas Armadas ESPE
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/create" style="color: #ffffff;">Añadir Paciente</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" style="color: #ffffff;">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" aria-disabled="true" style="color: #ffffff;">Turnos</a>
+                    </li>
+                </ul>
+                <form class="d-flex" role="search" action="/" method="GET">
+                    <input class="form-control me-2" type="search" placeholder="Buscar Paciente" aria-label="Search" name="search_query" value="<%= searchQuery %>">
+                    <button class="btn btn-outline-light" type="submit">Buscar</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container-fluid">
+        <div class="table-container">
+            <a href="/create" class="btn btn-outline-primary mt-4"><i class='bx bxs-plus-circle bx-md'></i></a>
+            <table class="table table-bordered table-striped text-center mt-4">
+                <thead>
+                    <tr class="bg-primary text-white">
+                        <th scope="col">ID</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Apellido</th>
+                        <th scope="col">Sexo</th>
+                        <th scope="col">Edad</th>
+                        <th scope="col">Lesión</th>
+                        <th scope="col">Estado mental</th>
+                        <th scope="col">Dolor</th>
+                        <th scope="col">NRS Dolor</th>
+                        <th scope="col">Presión sistólica (SBP)</th>
+                        <th scope="col">Presión diastólica (DBP)</th>
+                        <th scope="col">Frecuencia cardíaca (HR)</th>
+                        <th scope="col">Frecuencia respiratoria (RR)</th>
+                        <th scope="col">Temperatura corporal (BT)</th>
+                        <th scope="col">Nombre Médico</th>
+                    </tr>   
+                </thead>
+                <tbody>
+                    <% results.forEach((user) => { %>
+                    <tr>
+                        <td><%= user.id %></td>
+                        <td><%= user.nombre %></td>
+                        <td><%= user.apellido %></td>
+                        <td><%= user.sexo %></td>
+                        <td><%= user.edad %></td>
+                        <td><%= user.lesion %></td>
+                        <td><%= user.estado_mental %></td>
+                        <td><%= user.dolor %></td>
+                        <td><%= user.nrs_pain %></td>
+                        <td><%= user.sbp %></td>
+                        <td><%= user.dbp %></td>
+                        <td><%= user.hr %></td>
+                        <td><%= user.rr %></td>
+                        <td><%= user.bt %></td>
+                        <td><%= user.nombre_medico %></td>
+                        <td>
+                            <a href="/edit/<%= user.id %>" class="btn btn-outline-info">Editar</a>
+                            <a href="/delete/<%= user.id %>" class="btn btn-outline-danger">Borrar</a>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
