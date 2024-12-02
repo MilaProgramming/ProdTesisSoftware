@@ -1,57 +1,145 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admisión de Paciente</title>
-</head>
-<body>
+<%- include("template/header") %>
+
+<style>
+    .container {
+        max-width: 600px;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-top: 50px;
+    }
+
+    h1 {
+        color: #277854;
+        text-align: center;
+    }
+
+    .form-label {
+        color: #277854;
+    }
+
+    .btn-primary {
+        background-color: #277854;
+        border-color: #277854;
+    }
+
+    .btn-primary:hover {
+        background-color: #1d5e43;
+        border-color: #1d5e43;
+    }
+
+    .form-control {
+        border: 1px solid #277854;
+    }
+
+    .submit-btn {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    /* Media Queries */
+    @media (max-width: 768px) {
+        .container {
+            width: 90%;
+            margin-top: 30px;
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+    }
+</style>
+
+<div class="container form-container mt-5">
     <h1>Admisión de Paciente</h1>
-
     <form action="/validar" method="post">
-        Nombre: 
-        <input type="text" name="nombre" id="nombre"><br><br>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="nombre" class="form-label">Nombre:</label>
+                <input type="text" class="form-control" name="nombre" id="nombre">
+            </div>
+            <div class="col-md-6">
+                <label for="apellido" class="form-label">Apellido:</label>
+                <input type="text" class="form-control" name="apellido" id="apellido">
+            </div>
+        </div>
 
-        Apellido:
-        <input type="text" name="apellido" id="apellido"><br><br>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="edad" class="form-label">Edad:</label>
+                <input type="number" class="form-control" name="edad" id="edad">
+            </div>
+            <div class="col-md-6">
+                <label for="sexo" class="form-label">Sexo:</label>
+                <input type="text" class="form-control" name="sexo" id="sexo">
+            </div>
+        </div>
 
-        Edad:
-        <input type="number" name="edad" id="edad"><br><br>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="llegada_paciente" class="form-label">¿Cómo llegó el paciente?</label>
+                <input type="text" class="form-control" name="llegada_paciente" id="llegada_paciente">
+            </div>
+            <div class="col-md-6">
+                <label for="paciente_herido" class="form-label">¿Está el paciente herido?</label>
+                <input type="text" class="form-control" name="paciente_herido" id="paciente_herido">
+            </div>
+        </div>
 
-        Sexo:
-        <input type="text" name="sexo" id="sexo"><br><br>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="estado_mental_paciente" class="form-label">Estado mental del paciente:</label>
+                <input type="text" class="form-control" name="estado_mental_paciente" id="estado_mental_paciente">
+            </div>
+            <div class="col-md-6">
+                <label for="dolor_paciente" class="form-label">¿El paciente tiene dolor?</label>
+                <input type="text" class="form-control" name="dolor_paciente" id="dolor_paciente">
+            </div>
+        </div>
 
-        ¿Cómo llegó el paciente?:
-        <input type="text" name="llegada_paciente" id="llegada_paciente"><br><br>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="escala_dolor" class="form-label">Escala dolor (0-10):</label>
+                <input type="number" class="form-control" name="escala_dolor" id="escala_dolor">
+            </div>
+            <div class="col-md-6">
+                <label for="temperatura_corporal" class="form-label">Temperatura Corporal (C):</label>
+                <input type="number" class="form-control" name="temperatura_corporal" id="temperatura_corporal">
+            </div>
+        </div>
 
-        ¿Está el paciente herido?:
-        <input type="text" name="paciente_herido" id="paciente_herido"><br><br>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="presion_arterial_sistolica" class="form-label">Presión Arterial Sistólica (mmHg):</label>
+                <input type="number" class="form-control" name="presion_arterial_sistolica" id="presion_arterial_sistolica">
+            </div>
+            <div class="col-md-6">
+                <label for="presion_arterial_diastolica" class="form-label">Presión Arterial Diastólica (mmHg):</label>
+                <input type="number" class="form-control" name="presion_arterial_diastolica" id="presion_arterial_diastolica">
+            </div>
+        </div>
 
-        Estado mental del paciente:
-        <input type="text" name="estado_mental_paciente" id="estado_mental_paciente"><br><br>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="frecuencia_cardiaca" class="form-label">Frecuencia Cardiaca (bpm):</label>
+                <input type="number" class="form-control" name="frecuencia_cardiaca" id="frecuencia_cardiaca">
+            </div>
+            <div class="col-md-6">
+                <label for="tasa_respiracion" class="form-label">Tasa de Respiración (bpm):</label>
+                <input type="number" class="form-control" name="tasa_respiracion" id="tasa_respiracion">
+            </div>
+        </div>
 
-        ¿El paciente tiene dolor?:
-        <input type="text" name="dolor_paciente" id="dolor_paciente"><br><br>
-
-        Escala dolor (0-10):
-        <input type="number" name="escala_dolor" id="escala_dolor"><br><br>
-
-        Temperatura Corporal (C):
-        <input type="number" name="temperatura_corporal" id="temperatura_corporal"><br><br>
-
-        Presión Arterial Sistólica (mmHg):
-        <input type="number" name="presion_arterial_sistolica" id="presion_arterial_sistolica"><br><br>
-
-        Presión Arterial Diastolica (mmHg):
-        <input type="number" name="presion_arterial_diastolica" id="presion_arterial_diastolica"><br><br>
-
-        Frecuencia Cardiaca (bpm):
-        <input type="number" name="frecuencia_cardiaca" id="frecuencia_cardiaca"><br><br>
-
-        Tasa de Respiración (bpm):
-        <input type="number" name="tasa_respiracion" id="tasa_respiracion"><br><br>
-
-        <input type="submit" value="Añadir Paciente">
+        <div class="submit-btn">
+            <button type="submit" class="btn btn-primary">Añadir Paciente</button>
+        </div>
+        <div class="submit-btn">
+            <button type="submit" class="btn btn-primary">Ver información del Paciente</button>
+        </div>
     </form>
-</body>
-</html>
+</div>
+
+<footer class="container">
+    <%- include("template/footer") %>
+</footer>
