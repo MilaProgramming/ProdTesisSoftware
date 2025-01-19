@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306" # Mapear el puerto 3306 del contenedor al host
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    command: --bind-address=0.0.0.0 #  Permitir conexiones desde cualquier IP
+
+  tesis-model-service:
+    image: beemila666/tesis-model:latest
+    container_name: tesis_model_container
+    ports:
+      - "5000:5000"
+    restart: always

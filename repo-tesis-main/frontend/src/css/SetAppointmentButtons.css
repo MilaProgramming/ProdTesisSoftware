@@ -1,0 +1,9 @@
+.inactive-option:hover {
+  color: black;
+  background-color: #cae3cf;
+}
+
+.active-option:hover {
+  color: white;
+  background-color: #0b3318;
+}
