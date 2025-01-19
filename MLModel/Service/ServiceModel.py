@@ -12,7 +12,7 @@ gradient_boosting_model = joblib.load("gradient_boosting_model.pkl")
 random_forest_model = joblib.load("random_forest_model.pkl")
 
 # Define the expected features
-features = ['Sex', 'Age', 'Injury', 'Mental', 'NRS_pain', 'SBP', 'DBP', 'HR', 'RR', 'BT', 'Saturation']
+features = ['gender', 'age', 'PainGrade', 'BlooddpressurSystol', 'BlooddpressurDiastol', 'PulseRate', 'RespiratoryRate', 'O2Saturation', 'AVPU']
 
 def preprocess_input(data):
     """

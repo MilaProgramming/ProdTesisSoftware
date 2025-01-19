@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "6f110cc0-47cc-42eb-ab7c-5766a25b77d2",
 		"name": "ModeloTesis",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "28608285"
 	},
 	"item": [
@@ -13,14 +13,25 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"Sex\": 1,\r\n  \"Age\": 35,\r\n  \"Injury\": 0,\r\n  \"Mental\": 1,\r\n  \"NRS_pain\": 5,\r\n  \"SBP\": 120,\r\n  \"DBP\": 80,\r\n  \"HR\": 75,\r\n  \"RR\": 16,\r\n  \"BT\": 36.7,\r\n  \"Saturation\": 98\r\n}\r\n",
+					"raw": "{\r\n  \"gender\": 1,\r\n  \"age\": 45,\r\n  \"PainGrade\": 3,\r\n  \"BlooddpressurSystol\": 120,\r\n  \"BlooddpressurDiastol\": 80,\r\n  \"PulseRate\": 78,\r\n  \"RespiratoryRate\": 18,\r\n  \"O2Saturation\": 95,\r\n  \"AVPU\": 1\r\n}\r\n\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
 						}
 					}
 				},
-				"url": "http://localhost:5000/predict/random_forest"
+				"url": {
+					"raw": "http://localhost:5000/predict/random_forest",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"predict",
+						"random_forest"
+					]
+				}
 			},
 			"response": []
 		},
@@ -31,14 +42,25 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"Sex\": 1,\r\n  \"Age\": 35,\r\n  \"Injury\": 0,\r\n  \"Mental\": 1,\r\n  \"NRS_pain\": 5,\r\n  \"SBP\": 120,\r\n  \"DBP\": 80,\r\n  \"HR\": 75,\r\n  \"RR\": 16,\r\n  \"BT\": 36.7,\r\n  \"Saturation\": 98\r\n}\r\n",
+					"raw": "{\r\n  \"gender\": 1,\r\n  \"age\": 45,\r\n  \"PainGrade\": 3,\r\n  \"BlooddpressurSystol\": 120,\r\n  \"BlooddpressurDiastol\": 80,\r\n  \"PulseRate\": 78,\r\n  \"RespiratoryRate\": 18,\r\n  \"O2Saturation\": 95,\r\n  \"AVPU\": 1\r\n}\r\n\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
 						}
 					}
 				},
-				"url": "http://localhost:5000/predict/gradient_boosting"
+				"url": {
+					"raw": "http://localhost:5000/predict/gradient_boosting",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"predict",
+						"gradient_boosting"
+					]
+				}
 			},
 			"response": []
 		}

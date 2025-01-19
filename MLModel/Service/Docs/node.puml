@@ -1,0 +1,48 @@
+@startuml mlModel
+left to right direction
+skinparam linetype ortho
+
+class Node {
+    - feature: int
+    - threshold: float
+    - left: Node
+    - right: Node
+    - value: int/float
+    + __init__(feature: int, threshold: float, left: Node, right: Node, value: int/float)
+    + is_leaf_node(): bool
+}
+
+class DecisionTree {
+    - max_depth: int
+    - min_samples_split: int
+    - root: Node
+    + __init__(max_depth: int, min_samples_split: int)
+    + fit(X: array, y: array): void
+    + predict(X: array): array
+    - _build_tree(X: array, y: array, depth: int): Node
+    - _best_split(X: array, y: array, feat_idxs: array): (int, float)
+    - _calculate_gini(X_column: array, y: array, threshold: float): float
+    - _split(X_column: array, split_thresh: float): (array, array)
+    - _most_common_label(y: array): int/float
+    - _traverse_tree(x: array, node: Node): int/float
+}
+
+class RandomForest {
+    - num_trees: int
+    - max_depth: int
+    - min_samples_split: int
+    - trees: list<DecisionTree>
+    - is_trained: bool
+    + __init__(num_trees: int, max_depth: int, min_samples_split: int)
+    + get_params(): dict
+    + set_params(**params): RandomForest
+    + fit(X: array, y: array): void
+    + predict(X: array): array
+    + score(X: array, y: array): float
+    - _train_tree(X: array, y: array): DecisionTree
+    - _bootstrap_sample(X: array, y: array): (array, array)
+}
+
+DecisionTree "1" *-- "1" Node : usa
+RandomForest "1" *-- "*" DecisionTree : contiene
+@enduml
