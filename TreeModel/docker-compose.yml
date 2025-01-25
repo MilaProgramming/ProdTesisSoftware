@@ -1,0 +1,7 @@
+services:
+  tesis-tree-service:
+    image: beemila666/treemodel:latest
+    container_name: tree_model
+    ports:
+      - "5000:5000"
+    restart: always

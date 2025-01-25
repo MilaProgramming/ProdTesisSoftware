@@ -207,8 +207,11 @@ def main(file_path):
     """
     data1 = load_cleaned_data(file_path)
 
-    # Columns triage_code,gender,age,admission_year,admission_month,admission_day,admission_weekday,admission_hour,kindref,ChiefComplaint,explainer_id,NeedFastExecute,CriticalStatus,StuporStatus,PainGrade,MentalDistress,MaterialDistress,Source,BlooddpressurSystol,BlooddpressurDiastol,PulseRate,RespiratoryRate,Temperature,O2Saturation,AVPU,TriageGrade,operational_patient,ref_specialist
-    columns_to_remove = [ 'Temperature', 'triage_code', 'admission_year', 'admission_month', 'admission_day', 'admission_weekday', 'admission_hour', 'kindref', 'ChiefComplaint','explainer_id', 'NeedFastExecute', 'CriticalStatus', 'StuporStatus', 'MentalDistress', 'MaterialDistress', 'Source', 'operational_patient', 'ref_specialist']
+    summarize_data(data1)
+    
+    print("\nElimino columnas no relevantes:")
+    # Columns Group,Sex,Age,Patients number per hour,Arrival mode,Injury,Chief_complain,Mental,Pain,NRS_pain,SBP,DBP,HR,RR,BT,Saturation,KTAS_RN,Diagnosis in ED,Disposition,KTAS_expert,Error_group,Length of stay_min,KTAS duration_min,mistriage
+    columns_to_remove = ['Group', 'Patients number per hour', 'Arrival mode', 'Chief_complain', 'Diagnosis in ED', 'Disposition','KTAS_RN', 'KTAS duration_min', 'Length of stay_min', 'mistriage', 'Error_group']
     
     data = data1.drop(columns=columns_to_remove)
     # Resumen y estadísticas del conjunto de datos
@@ -223,17 +226,8 @@ def main(file_path):
     dataFinal = remove_missing_rows(data)
     
     summarize_data(dataFinal)
-        
-    # Mapping categorical values to numbers
-    gender_mapping = {"Male": 1, "Female": 2}
-    avpu_mapping = {"A": 1, "V": 2, "P": 3, "U": 4}
-    
-    dataFinal["gender"] = dataFinal["gender"].map(gender_mapping)
-    dataFinal["AVPU"] = dataFinal["AVPU"].map(avpu_mapping)
-    
-    # Save cleaned data to CSV
-    dataFinal.to_csv('./Data/data_to_train.csv', index=False)
+
 
 if __name__ == "__main__":
-    file_path = './Data/ED_triage.csv'  # Ruta del archivo de datos limpio
+    file_path = './Data/dataP1.csv'  # Ruta del archivo de datos limpio
     main(file_path)

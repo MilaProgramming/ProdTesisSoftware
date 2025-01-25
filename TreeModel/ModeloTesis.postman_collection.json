@@ -1,0 +1,38 @@
+{
+	"info": {
+		"_postman_id": "6f110cc0-47cc-42eb-ab7c-5766a25b77d2",
+		"name": "ModeloTesis",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28608285"
+	},
+	"item": [
+		{
+			"name": "predecir",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"dolor_cabeza\": 1,\r\n    \"temperatura\": 2,\r\n    \"dolor_estómago\": 2,\r\n    \"malestar_general\": 0,\r\n    \"dolor_garganta\": 1,\r\n    \"herida\": 0\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/obtenerUrgencia",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"obtenerUrgencia"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
