@@ -4,10 +4,12 @@ from sklearn.tree import DecisionTreeClassifier, export_text
 # Datos de entrenamiento y niveles de urgencia
 # Etiquetas = [dolor_cabeza, temperatura, dolor_estómago, malestar_general, dolor_garganta, herida]
 # "leve"=1, "fuerte"=2, "baja"=1, "alta"=2, "no_sangra"=1, "sangra"=2
+
+# colico, continuo 
 X = [
     # Casos de entrenamiento
     # Casos 1: Critico
-    [2, 2, 2, 2, 2, 2],  # Síntomas graves en todas partes
+    [2, 2, 2, 2, 2, 2], # Síntomas graves en todas partes
     [0, 2, 0, 2, 0, 2], # Combinación de síntomas críticos: herida sangrante y temperatura alta
     [2, 2, 0, 2, 0, 0], # Combinación de síntomas críticos: dolor de cabeza fuerte y temperatura alta
     # Casos 2: Emergencia
@@ -16,7 +18,7 @@ X = [
     [1, 2, 0, 2, 0, 0],  # Dolor de cabeza leve, temperatura alta
     # Casos 3: Urgencia
     [0, 2, 0, 2, 0, 0],  # Solo temperatura alta.
-    [1, 1, 0, 2, 0, 1], # Dolor de cabeza leve, malestar general alto, herida presente.
+    [1, 1, 0, 2, 0, 1],  # Dolor de cabeza leve, malestar general alto, herida presente.
     [0, 1, 2, 1, 0, 0],  # Dolor estomacal alto y temperatura baja.
     # Casos 4: Estándar
     [1, 1, 0, 0, 0, 0],  # Dolor de cabeza leve, temperatura baja.
