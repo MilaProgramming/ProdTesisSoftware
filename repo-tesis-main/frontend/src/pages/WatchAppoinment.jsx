@@ -7,7 +7,7 @@ import { Stack } from '@mui/material';
 import "../css/SetAppointmentButtons.css";
 import axios from "axios";
 import { environment } from "../utils/evironment";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -54,13 +54,7 @@ const GlasgowComaScaleValues = {
 export const WatchAppoinment = ({ appointmentId, fullname, time, onReturn }) => {
   const appointmentDate = dayjs(time);
 
-  const user = {
-    role: "paciente",
-    fullname: "Pepe Pepito",
-    email: "pepito@gmail.com",
-  };
-
-	const [affections, setAffections] = React.useState({
+  const [affections, setAffections] = React.useState({
     fever: false,
     injury: true,
     pain: false,
@@ -88,7 +82,7 @@ export const WatchAppoinment = ({ appointmentId, fullname, time, onReturn }) => 
       setVitalSigns({ ...response.data.appointmentDetails.vitalSigns })
     };
     fetchData()
-  }, []);
+  }, [appointmentId]);
 
   return (
     <>
@@ -344,6 +338,7 @@ export const WatchAppoinment = ({ appointmentId, fullname, time, onReturn }) => 
           </Box>
         </>
       )}
+      <ToastContainer />
     </>
   );
 };

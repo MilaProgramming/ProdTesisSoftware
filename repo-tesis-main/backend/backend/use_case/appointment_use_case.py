@@ -13,15 +13,26 @@ class AppointmentUseCase(BaseUseCase):
     def getAll(self, username: str):
         try:
             response = self.repository.getAll(username)
-            appointments = [Appointment(id=appointment.id, appointmentStatus=appointment.appointmentStatus,
-                                        appointmentDate=appointment.appointmentDate, userId=appointment.userId)for appointment in response]
-            return appointments
+            formattedResponse = []
+            for appointment, detail in response:
+                formattedResponse.append(
+                    {
+                        "id": appointment.id,
+                        "userId": appointment.userId,
+                        "appointmentStatus": appointment.appointmentStatus,
+                        "appointmentDate": appointment.appointmentDate,
+                        "appointmentType": appointment.appointmentType,
+                        "observations": detail.observations
+                    }
+                )
+            return formattedResponse
         except HTTPException as ex:
             raise ex
 
-    def create(self, appointment: Appointment, username: str):
+    def create(self, appointment: Appointment, username: str, newUserFromAppointment: bool):
         try:
-            response = self.repository.create(appointment, username)
+            response = self.repository.create(
+                appointment, username, newUserFromAppointment)
             return response
         except HTTPException as ex:
             raise ex
@@ -33,10 +44,10 @@ class AppointmentUseCase(BaseUseCase):
         except HTTPException as ex:
             raise ex
 
-    def changeAppointmentStatus(self, appointmentId: str, appointmentStatus: str):
+    def changeAppointmentStatus(self, appointmentId: str, appointmentStatus: str, observations: str):
         try:
             response = self.repository.changeAppointmentStatus(
-                appointmentId, appointmentStatus)
+                appointmentId, appointmentStatus, observations)
             return response
         except HTTPException as ex:
             raise ex
@@ -64,6 +75,7 @@ class AppointmentUseCase(BaseUseCase):
                         "userId": appointment.userId,
                         "appointmentStatus": appointment.appointmentStatus,
                         "appointmentDate": appointment.appointmentDate,
+                        "appointmentType": appointment.appointmentType,
                         "userFullname": f"{user.name} {user.lastname}"
                     }
                 )
@@ -81,6 +93,14 @@ class AppointmentUseCase(BaseUseCase):
     def updateAppointment(self, appointmentTime: AppointmentTime):
         try:
             response = self.repository.updateAppointment(appointmentTime)
+            return response
+        except HTTPException as ex:
+            raise ex
+
+    def getAppointmentTimes(self, appointmentType: str, date: str):
+        try:
+            response = self.repository.getAppointmentTimes(
+                appointmentType, date)
             return response
         except HTTPException as ex:
             raise ex

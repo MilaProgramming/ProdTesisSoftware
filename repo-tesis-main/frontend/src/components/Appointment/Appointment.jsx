@@ -4,8 +4,16 @@ import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import CloseIcon from "@mui/icons-material/Close";
 import React from "react";
 
+const appointmentTypes = {
+  "appointment": "Turno Médico",
+  "vitalSignes": "Toma de Signos Vitales",
+  "injection": "Aplicación de Inyección",
+  "desinfection": "Desinfección de Heridas",
+  "certificate": "Validación de Certificado"
+}
+
 export const Appointment = (props) => {
-  const { id, time, fullname, status, onAttend, onModify, onCancel, onView } =
+  const { id, time, fullname, status, onAttend, onCancel, appointmentType } =
     props;
   return (
     <Box
@@ -22,14 +30,15 @@ export const Appointment = (props) => {
           <AssignmentTurnedInIcon sx={{ fontSize: "76px" }} />
         )}
         {status === "canceled" && <CloseIcon sx={{ fontSize: "76px" }} />}
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", minWidth: "200px" }}>
           <Typography sx={{ fontSize: "24px", color: "black" }}>
-            {time.split("T")[1]}
+            {time}
           </Typography>
           <Typography sx={{ fontSize: "24px", color: "#938D8D" }}>
             {fullname}
           </Typography>
         </Box>
+        <Typography sx={{ alignSelf: "center", fontSize: "24px" }}>{appointmentTypes[appointmentType]}</Typography>
       </Box>
       <Box
         sx={{
@@ -42,9 +51,7 @@ export const Appointment = (props) => {
         {status === "pending" && (
           <>
             <Button
-              onClick={() =>
-                onAttend({ id: id, fullname: fullname, time: time })
-              }
+              onClick={() => onAttend({ id: id, fullname: fullname, time: time })}
               type="button"
               sx={{
                 backgroundColor: "#0CE07A",
@@ -55,20 +62,6 @@ export const Appointment = (props) => {
               }}
             >
               Atender
-            </Button>
-            <Button
-              onClick={() => onModify({ id: id, fullname: fullname, time: time })}
-              type="button"
-              value={id}
-              sx={{
-                backgroundColor: "#E0B60C",
-                height: "31px",
-                width: "140px",
-                borderRadius: "10px",
-                color: "white",
-              }}
-            >
-              Modificar
             </Button>
             <Button
               type="button"
@@ -85,23 +78,6 @@ export const Appointment = (props) => {
               }
             >
               Cancelar
-            </Button>
-          </>
-        )}
-        {status === "finished" && (
-          <>
-            <Button
-              onClick={() => onView({ id: id, fullname: fullname, time: time })}
-              type="button"
-              sx={{
-                backgroundColor: "#112950",
-                height: "31px",
-                width: "fit-content",
-                borderRadius: "10px",
-                color: "white",
-              }}
-            >
-              Ver Detalle
             </Button>
           </>
         )}

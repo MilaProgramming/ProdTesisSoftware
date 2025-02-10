@@ -3,17 +3,10 @@ import SessionContext from "../context/SessionContext";
 import {
   Box,
   Button,
-  Checkbox,
+  CircularProgress,
   Divider,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
   IconButton,
-  MenuItem,
-  Radio,
-  RadioGroup,
-  Select,
-  TextField,
+  TextareaAutosize,
   Typography,
 } from "@mui/material";
 import { CustomDrawer } from "../components/Drawer/CustomDrawer";
@@ -21,16 +14,12 @@ import { Appointment } from "../components/Appointment/Appointment";
 import { CancelAppointmentModal } from "../components/CancelAppointmentModal/CancelAppointmentModal";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
-import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
-import { toast } from "react-toastify";
-import { TriageModal } from "../components/TriageModal/TriageModal";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
 import { environment } from "../utils/evironment";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { SentToAttendModal } from "../components/SentToAttendModal/SentToAttendModal";
-import { UpdateAppointment } from "./UpdateAppointment";
-import { WatchAppoinment } from "./WatchAppoinment";
 
 const StatusColor = {
   resuscitation: "#E00C0C",
@@ -56,28 +45,35 @@ const StatusNumbers = {
   5: "noUrgency"
 }
 
+const attendedAppointmentTypesStaff = [
+  "vitalSignes",
+  "injection",
+  "desinfection",
+]
+
+const symptomsLabels = {
+  headache: "Dolor de cabeza",
+  stomachache: "Dolor de estómago",
+  burningThroat: "Ardor de garganta",
+  temperature: "Temperatura",
+  generalMalaise: "Malestar general",
+  theresWound: "Herida",
+};
+
+const symptomsValues = {
+  1: "Leve",
+  2: "Intenso",
+};
+
+const woundValues = {
+  1: "No Sangra",
+  2: "Sangra",
+}
+
 const reducer = (state, action) => {
   switch (action.type) {
-    case "UPDATE_TEMPERATURE":
-      return { ...state, temperature: action.payload };
-    case "UPDATE_SYSTOLIC_PRESSURE":
-      return { ...state, systolicPressure: action.payload };
-    case "UPDATE_DIASTOLIC_PRESSURE":
-      return { ...state, diastolicPressure: action.payload };
-    case "UPDATE_HEART_RATE":
-      return { ...state, heartRate: action.payload };
-    case "UPDATE_RESPIRATION_RATE":
-      return { ...state, respirationRate: action.payload };
-    case "UPDATE_AGE":
-      return { ...state, age: action.payload };
-    case "UPDATE_SEX":
-      return { ...state, sex: action.payload };
-    case "UPDATE_PATIENT_STATUS":
-      return { ...state, patientStatus: action.payload };
     case "UPDATE_TRIAGE_STATUS":
       return { ...state, triageStatus: action.payload };
-    case "UPDATE_THERES_LESSION":
-      return { ...state, theresLession: action.payload };
     case "RESET_STATE":
       return initialState;
     default:
@@ -85,37 +81,27 @@ const reducer = (state, action) => {
   }
 };
 
-// Estado inicial
 const initialState = {
-  temperature: "",
-  systolicPressure: "",
-  diastolicPressure: "",
-  heartRate: "",
-  respirationRate: "",
-  age: "",
-  sex: "",
-  patientStatus: "",
-  theresLession: "",
-  triageStatus: "",
+  triageStatus: null,
 };
 
 export const Appointments = () => {
   const [pendingAppointments, setPendingAppointments] = useState([]);
   const [openCancelModal, setOpenCancelModal] = useState(false);
-  const [openTriageModal, setOpenTriageModal] = useState(false);
   const [openSentToAttend, setOpenSentToAttend] = useState(false);
+  const [symptomsData, setSymptomsData] = useState({});
+  const [symptomsComponents, setSymptomsComponents] = useState([]);
   const [appointmentData, setAppointmentData] = useState({});
   const [needsToBeReloaded, setNeedsToBeReloaded] = useState(false);
-  const [painLevel, setPainLevel] = useState(0);
-  const [affections, setAffections] = useState({});
   const [isAttending, setIsAttending] = useState(false);
-  const [isModifying, setIsModifying] = useState(false);
-  const [isView, setIsView] = useState(false);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { user } = useContext(SessionContext);
   const [buttonClass] = useState(true);
   const [comment, setComment] = useState("");
+  const [observation, setObservation] = useState("");
+  const [triageFinished, setTriageFinished] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleCloseCancelModal = () => {
     setOpenCancelModal(false);
@@ -127,87 +113,66 @@ export const Appointments = () => {
     setOpenCancelModal(true);
   };
 
-  const handleOpenTriageModal = () => {
-    setOpenTriageModal(true);
-  };
-
-  const handleCloseTriageModal = () => {
-    setOpenTriageModal(false);
-  };
-
-  const onModify = (data) => {
-    setAppointmentData(data);
-    setIsModifying(true)
-  };
-
   const onAttend = (data) => {
     setAppointmentData(data);
     setIsAttending(true);
   };
 
-  const onView = (data) => {
-    setAppointmentData(data);
-    setIsView(true)
-  };
-
-  const onSend = () => {
-    onSave()
-    setOpenSentToAttend(true)
-    setOpenTriageModal(false)
-  }
-
   const handleCloseSentToAttendModal = () => {
     setOpenSentToAttend(false);
   };
 
+  const handleObservation = (event) => {
+    setObservation(event.target.value)
+  }
+
   const onSave = () => {
     const saveChanges = async () => {
-      const response = axios.put(`${environment.apiUrl}/appointments/details`, {
+      const response = await axios.put(`${environment.apiUrl}/appointments/details`, {
         appointmentId: appointmentData.id,
-        generalAffections: { ...affections },
-        painLevel: painLevel,
-        vitalSigns: {
-          temperature: state.temperature,
-          systolicPressure: state.systolicPressure,
-          diastolicPressure: state.diastolicPressure,
-          heartRate: state.heartRate,
-          respirationRate: state.respirationRate,
-        },
-        triageStatus: state.triageStatus !== "" ? state.triageStatus.toString() : "",
-        patientStatus: state.patientStatus,
-        theresLession: state.theresLession,
+        triageStatus: state.triageStatus !== "" ? state.triageStatus : "",
+        observations: observation,
+        ...symptomsData
       });
+      const changeResponse = await axios.put(`${environment.apiUrl}/appointments/${appointmentData.id}/finished?observations=${observation}`)
       setIsAttending(false);
-      toast.success("Los Datos se guardaron correctamente");
+      if (response.data.status === 200 && changeResponse.data.status === 200) {
+        toast.success("Los Datos se guardaron correctamente");
+      } else {
+        toast.error("Ocurrio un error al guardar los datos")
+      }
     };
     saveChanges();
+    setNeedsToBeReloaded(true);
     dispatch({ type: "RESET_STATE" });
   };
 
   const onCancel = (event) => {
     const changeStatus = async (appointmentId) => {
-      axios.put(`${environment.apiUrl}/appointments/${appointmentId}/canceled`);
+      const response = axios.put(`${environment.apiUrl}/appointments/${appointmentId}/canceled?observations=${comment}`);
+      if (response.data.status === 200) {
+        toast.success("Cita cancelada exitosamente!");
+      } else {
+        toast.error("La cita no fue cancelada.");
+      }
     };
-    const response = changeStatus(event.target.value);
-    if (response.status === 200) {
-      toast.success("Cita cancelada exitosamente!");
-    } else {
-      toast.error("La cita no fue cancelada.");
-    }
+    setComment("");
+    changeStatus(event.target.value);
     setOpenCancelModal(false);
     setNeedsToBeReloaded(true);
   };
 
   const onCancelInasistance = (event) => {
     const changeStatus = async (appointmentId) => {
-      axios.put(`${environment.apiUrl}/appointments/${appointmentId}/canceled`);
+      const response = await axios.put(`${environment.apiUrl}/appointments/${appointmentId}/canceled?observations=Cancelado por inasistencia`);
+      if (response.data.status === 200) {
+        toast.success("Cita cancelada exitosamente!");
+      } else {
+        toast.error("La cita no fue cancelada.");
+      }
     };
-    const response = changeStatus(event.target.value);
-    if (response.status === 200) {
-      toast.success("Cita cancelada exitosamente!");
-    } else {
-      toast.error("La cita no fue cancelada.");
-    }
+    setComment("");
+    changeStatus(event.target.value);
     setOpenCancelModal(false);
     setNeedsToBeReloaded(true);
   };
@@ -217,14 +182,21 @@ export const Appointments = () => {
   };
 
   useEffect(() => {
-    if (!user) navigate("/");
+    if (localStorage.getItem("session") === null || localStorage.getItem("session") === "null") navigate("/")
+    if (location.state && location.state.isAttending && location.state.patientData) {
+      setAppointmentData(location.state.patientData);
+      setIsAttending(true);
+    }
+  }, [])
+
+  useEffect(() => {
     const getAppointmentsByDate = async () => {
       const response = await axios.get(
         `${environment.apiUrl}/appointments/doctor-appointments/${user.id}`
       );
       const appointmentsByDate = response.data.appointments.reduce(
         (acc, appointment) => {
-          const date = appointment.appointmentDate.split("T")[0]; // Get only the date (YYYY-MM-DD)
+          const date = appointment.appointmentDate.split("T")[0];
           if (!acc[date]) {
             acc[date] = [];
           }
@@ -233,41 +205,74 @@ export const Appointments = () => {
         },
         {}
       );
-      const appointmentByDatesComponents = [];
+      const appointmentByDatesComponentsStaff = [];
+      const appointmentByDatesComponentsDr = [];
       const dates = Object.keys(appointmentsByDate);
       for (const date of dates) {
         const appointments = appointmentsByDate[date];
-        const appointmentComponents = [];
-        appointments.forEach((appointment) => {
-          appointmentComponents.push(
-            <Appointment
-              key={`appointment-${appointment.id}`}
-              id={appointment.id}
-              time={appointment.appointmentDate}
-              fullname={appointment.userFullname}
-              status={appointment.appointmentStatus}
-              onAttend={onAttend}
-              onModify={onModify}
-              onCancel={handleOpenCancelModal}
-              onView={onView}
-            />
-          );
-        });
-        appointmentByDatesComponents.push(
-          <Box
-            key={`appointments-date-${date}`}
-            sx={{ display: "flex", flexDirection: "column" }}
-          >
-            <Typography sx={{ fontSize: "24px" }}>{date}</Typography>
-            <Divider sx={{ borderColor: "black" }} />
-            {appointmentComponents}
-          </Box>
-        );
+        const appointmentComponentsDr = [];
+        const appointmentComponentsStaff = [];
+        if (date >= new Date().toISOString().split("T")[0]) {
+          appointments.forEach((appointment) => {
+            if (attendedAppointmentTypesStaff.includes(appointment.appointmentType)) {
+              appointmentComponentsStaff.push(
+                <Appointment
+                  key={`appointment-${appointment.id}`}
+                  id={appointment.id}
+                  time={appointment.appointmentDate.split("T")[1]}
+                  fullname={appointment.userFullname}
+                  status={appointment.appointmentStatus}
+                  onAttend={onAttend}
+                  onCancel={handleOpenCancelModal}
+                  appointmentType={appointment.appointmentType}
+                />
+              );
+            } else {
+              appointmentComponentsDr.push(
+                <Appointment
+                  key={`appointment-${appointment.id}`}
+                  id={appointment.id}
+                  time={appointment.appointmentDate.split("T")[1]}
+                  fullname={appointment.userFullname}
+                  status={appointment.appointmentStatus}
+                  onAttend={onAttend}
+                  onCancel={handleOpenCancelModal}
+                  appointmentType={appointment.appointmentType}
+                />
+              );
+            }
+          });
+          if (appointmentComponentsDr.length > 0) {
+            appointmentByDatesComponentsDr.push(
+              <Box
+                key={`appointments-date-${date}`}
+                sx={{ display: "flex", flexDirection: "column" }}
+              >
+                <Typography sx={{ fontSize: "24px" }}>{date}</Typography>
+                <Divider sx={{ borderColor: "black" }} />
+                {appointmentComponentsDr}
+              </Box>
+            );
+          }
+          if (appointmentComponentsStaff.length > 0) {
+            appointmentByDatesComponentsStaff.push(
+              <Box
+                key={`appointments-date-${date}`}
+                sx={{ display: "flex", flexDirection: "column" }}
+              >
+                <Typography sx={{ fontSize: "24px" }}>{date}</Typography>
+                <Divider sx={{ borderColor: "black" }} />
+                {appointmentComponentsStaff}
+              </Box>
+            );
+          }
+        }
       }
-      setPendingAppointments(appointmentByDatesComponents);
+      setPendingAppointments(user.role === "medical_staff" ? appointmentByDatesComponentsStaff : appointmentByDatesComponentsDr);
     };
     getAppointmentsByDate();
     setNeedsToBeReloaded(false);
+    // eslint-disable-next-line
   }, [needsToBeReloaded]);
 
   useEffect(() => {
@@ -276,85 +281,59 @@ export const Appointments = () => {
         `${environment.apiUrl}/appointments/details/${appointmentData.id}`
       );
       const appointmentDetails = response.data.appointmentDetails;
-      setAffections(
-        appointmentDetails.generalAffections !== null
-          ? appointmentDetails.generalAffections
-          : { fever: false, injury: false, pain: false }
-      );
-      setPainLevel(
-        appointmentDetails.painLevel !== null ? appointmentDetails.painLevel : 0
-      );
-      if (appointmentDetails.vitalSigns !== null) {
+
+      const getTriage = async () => {
+        const response = await axios.post(environment.modelUrl,
+          {
+            "dolor_cabeza": appointmentDetails.headache,
+            "temperatura": appointmentDetails.temperature,
+            "dolor_estómago": appointmentDetails.stomachache,
+            "malestar_general": appointmentDetails.generalMalaise,
+            "dolor_garganta": appointmentDetails.burningThroat,
+            "herida": appointmentDetails.theresWound
+          }
+        )
         dispatch({
-          type: "UPDATE_TEMPERATURE",
-          payload: appointmentDetails.vitalSigns.temperature,
-        });
-        dispatch({
-          type: "UPDATE_SYSTOLIC_PRESSURE",
-          payload: appointmentDetails.vitalSigns.systolicPressure,
-        });
-        dispatch({
-          type: "UPDATE_DIASTOLIC_PRESSURE",
-          payload: appointmentDetails.vitalSigns.diastolicPressure,
-        });
-        dispatch({
-          type: "UPDATE_HEART_RATE",
-          payload: appointmentDetails.vitalSigns.heartRate,
-        });
-        dispatch({
-          type: "UPDATE_RESPIRATION_RATE",
-          payload: appointmentDetails.vitalSigns.respirationRate,
-        });
+          type: "UPDATE_TRIAGE_STATUS",
+          payload: response.data.nivel_urgencia,
+        })
+        appointmentDetails.triageStatus = response.data.nivel_urgencia
       }
-      if (appointmentDetails.theresLession !== null) {
-        dispatch({
-          type: "UPDATE_THERES_LESSION",
-          payload: appointmentDetails.theresLession,
-        });
-      }
-      if (appointmentDetails.patientStatus !== null) {
-        dispatch({
-          type: "UPDATE_PATIENT_STATUS",
-          payload: appointmentDetails.patientStatus,
-        });
-      }
-      if (appointmentDetails.patientStatus !== null) {
+      if (appointmentDetails.triageStatus === null) {
+        getTriage()
+      } else {
         dispatch({
           type: "UPDATE_TRIAGE_STATUS",
           payload: appointmentDetails.triageStatus,
-        });
+        })
       }
+      setSymptomsData({
+        "headache": appointmentDetails.headache,
+        "temperature": appointmentDetails.temperature,
+        "stomachache": appointmentDetails.stomachache,
+        "generalMalaise": appointmentDetails.generalMalaise,
+        "burningThroat": appointmentDetails.burningThroat,
+        "theresWound": appointmentDetails.theresWound
+      })
+      const tmpComponents = Object.entries(appointmentDetails).map(([symptom, value]) => {
+        if (value > 0 && symptom in symptomsLabels) {
+          return (
+            <Box key={symptom} sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
+              <Typography>{`${symptomsLabels?.[symptom]}:`}</Typography>
+              <Typography sx={{ fontWeight: "bold" }}>{symptom !== 'theresWound' ? symptomsValues?.[value] : woundValues?.[value]}</Typography>
+            </Box>
+          );
+        }
+        return null;
+      });
+      setSymptomsComponents(tmpComponents.filter((component) => component !== null && component !== undefined));
     };
     if (appointmentData.id !== undefined) {
-      getAppointmentData();
+      getAppointmentData().finally(() => setTriageFinished(true));
     }
+    setTriageFinished(false);
+    // eslint-disable-next-line
   }, [isAttending]);
-
-  useEffect(() => {
-    if (openTriageModal) {
-      const getTriage = async () => {
-        const response = await axios.post("http://127.0.0.1:5000/predict/random_forest", {
-          "Sex": Number(state.sex),
-          "Age": Number(state.age),
-          "Injury": Number(state.theresLession),
-          "Mental": Number(state.patientStatus),
-          "NRS_pain": painLevel,
-          "SBP": Number(state.systolicPressure),
-          "DBP": Number(state.diastolicPressure),
-          "HR": Number(state.heartRate),
-          "RR": Number(state.respirationRate),
-          "BT": Number(state.temperature),
-          "Saturation": 98
-        })
-        dispatch({
-          type: "UPDATE_TRIAGE_STATUS",
-          payload: response.data.prediction[0],
-        })
-      }
-      getTriage()
-    }
-  }, [openTriageModal]);
-
   return (
     <Box sx={{ display: "flex", backgroundColor: "#E5E4E4" }}>
       <CustomDrawer
@@ -372,9 +351,11 @@ export const Appointments = () => {
             borderRadius: "10px",
             display: "flex",
             flexDirection: "column",
+            height: "100vh",
+            overflowY: "auto",
           }}
         >
-          {!isAttending && !isModifying && !isView &&
+          {!isAttending &&
             <>
               <Typography sx={{ fontSize: "48px" }}>{"Turnos"}</Typography>
               <Divider sx={{ borderColor: "black" }} />
@@ -412,579 +393,136 @@ export const Appointments = () => {
                     Todos
                   </Button>
                 </Box>
-                <Box
-                  flex={1}
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                  }}
-                >
-                  <Button
-                    onClick={() => { }}
-                    sx={{
-                      display: "flex",
-                      width: "218px",
-                      height: "42px",
-                      borderRadius: "15px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: buttonClass ? "#E3FDE8" : "#115026",
-                      color: buttonClass ? "black" : "white",
-                    }}
-                    className={
-                      buttonClass ? "inactive-option" : "active-option"
-                    }
-                  >
-                    Pendientes
-                  </Button>
-                </Box>
-                <Box
-                  flex={1}
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                  }}
-                >
-                  <Button
-                    onClick={() => { }}
-                    sx={{
-                      display: "flex",
-                      width: "218px",
-                      height: "42px",
-                      borderRadius: "15px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backgroundColor: buttonClass ? "#E3FDE8" : "#115026",
-                      color: buttonClass ? "black" : "white",
-                    }}
-                    className={
-                      buttonClass ? "inactive-option" : "active-option"
-                    }
-                  >
-                    Archivados
-                  </Button>
-                </Box>
               </Box>
               <Box
                 sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
               >
-                {pendingAppointments}
+                {pendingAppointments.length > 0 ?
+                  pendingAppointments
+                  :
+                  <Box sx={{ display: "flex", flexDirection: "row" }}>
+                    <AccessTimeIcon sx={{ height: "70px", width: "auto" }} />
+                    <Typography sx={{ fontSize: "40px", alignSelf: "center" }}>
+                      No existen turnos pendientes.
+                    </Typography>
+                  </Box>
+                }
               </Box>
             </>
           }
           {isAttending &&
             <>
-              <Typography sx={{ fontSize: "48px" }}>
-                Datos de Enfermería
-              </Typography>
-              <Divider sx={{ borderColor: "black" }} />
-              <IconButton
-                sx={{ alignSelf: "start" }}
-                onClick={() => {
-                  setIsAttending(false);
-                  setAppointmentData({});
-                }}
-              >
-                <ChevronLeftIcon />
-              </IconButton>
-              <Box
-                sx={{
-                  backgroundColor: "#EBEBEB",
-                  borderRadius: "14px",
-                  fontSize: "20px",
-                  fontWeight: "600px",
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  padding: "20px",
-                }}
-              >
-                <Box sx={{ display: "flex", flexDirection: "row", gap: "8px" }}>
-                  <VisibilityOutlinedIcon />
-                  <Typography
-                    sx={{ fontWeight: 600 }}
-                  >{`${appointmentData.fullname} | ${appointmentData.time.split("T")}`}</Typography>
-                </Box>
-                <Box
-                  sx={{
-                    borderRadius: "10px",
-                    color: "white",
-                    paddingX: "10px",
-                    backgroundColor: state.triageStatus ? StatusColor[StatusNumbers[state.triageStatus]] : "#434343",
-                  }}
-                >
-                  <Typography>{state.triageStatus ? StatusLabels[StatusNumbers[state.triageStatus]] : "Sin Triage"}</Typography>
-                </Box>
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "1rem",
-                  paddingTop: "10px",
-                }}
-              >
-                <Box>
-                  <Typography sx={{ fontSize: "24px", color: "#666565" }}>
-                    {"General"}
+              {triageFinished ?
+                <>
+                  <Typography sx={{ fontSize: "48px" }}>
+                    Atender Turno
                   </Typography>
                   <Divider sx={{ borderColor: "black" }} />
-                </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-around",
-                    gap: "3rem",
-                  }}
-                >
-                  <Box sx={{ display: "flex", flexDirection: "column" }}>
-                    <Typography>Estado del Paciente</Typography>
-                    <FormControl fullWidth>
-                      <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={state.patientStatus}
-                        onChange={(e) =>
-                          dispatch({
-                            type: "UPDATE_PATIENT_STATUS",
-                            payload: e.target.value,
-                          })
-                        }
-                      >
-                        <MenuItem value={1}>Alerta</MenuItem>
-                        <MenuItem value={2}>Respuesta Verbal</MenuItem>
-                        <MenuItem value={3}>Respuesta al Dolor</MenuItem>
-                        <MenuItem value={4}>Sin Respuesta</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-
-                  <Box sx={{ display: "flex", flexDirection: "column" }}>
-                    <Typography>Existe lesión?</Typography>
-                    <FormControl fullWidth>
-                      <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={state.theresLession}
-                        onChange={(e) =>
-                          dispatch({
-                            type: "UPDATE_THERES_LESSION",
-                            payload: e.target.value,
-                          })
-                        }
-                      >
-                        <MenuItem value={0}>No Existencia</MenuItem>
-                        <MenuItem value={1}>Existencia No Grave</MenuItem>
-                        <MenuItem value={2}>Existencia Grave</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-                </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-around",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignSelf: "center",
+                  <IconButton
+                    sx={{ alignSelf: "start" }}
+                    onClick={() => {
+                      setIsAttending(false);
+                      setAppointmentData({});
                     }}
                   >
-                    <Typography sx={{ alignSelf: "center" }}>
-                      ¿Qué tan fuerte es el dolor?
-                    </Typography>
-                    <FormControl>
-                      <RadioGroup
-                        aria-labelledby="demo-radio-buttons-group-label"
-                        name="radio-buttons-group"
-                        value={painLevel}
-                        onChange={() => { }}
-                        sx={{
-                          paddingTop: "15px",
-                          display: "flex",
-                          flexDirection: "row",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <FormControlLabel
-                          value="1"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio icon={SentimentSatisfiedAltIcon} />}
-                          label="1"
-                        />
-                        <FormControlLabel
-                          value="2"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="2"
-                        />
-                        <FormControlLabel
-                          value="3"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="3"
-                        />
-                        <FormControlLabel
-                          value="4"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="4"
-                        />
-                        <FormControlLabel
-                          value="5"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="5"
-                        />
-                        <FormControlLabel
-                          value="6"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="6"
-                        />
-                        <FormControlLabel
-                          value="7"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="7"
-                        />
-                        <FormControlLabel
-                          value="8"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="8"
-                        />
-                        <FormControlLabel
-                          value="9"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="9"
-                        />
-                        <FormControlLabel
-                          value="10"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={
-                            <Radio icon={SentimentVeryDissatisfiedIcon} />
-                          }
-                          label="10"
-                        />
-                      </RadioGroup>
-                    </FormControl>
-                  </Box>
+                    <ChevronLeftIcon />
+                  </IconButton>
                   <Box
                     sx={{
-                      borderRadius: "14px",
                       backgroundColor: "#EBEBEB",
-                      padding: "25px",
-                    }}
-                  >
-                    <Typography sx={{ fontSize: "16px" }}>
-                      Afecciones Generales
-                    </Typography>
-                    <FormControl component="fieldset" variant="standard">
-                      <FormGroup>
-                        <FormControlLabel
-                          onChange={() => { }}
-                          value={affections.fever}
-                          control={
-                            <Checkbox checked={affections.fever} name="fever" />
-                          }
-                          label="Temperatura alta"
-                        />
-                        <FormControlLabel
-                          onChange={() => { }}
-                          value={affections.injury}
-                          control={
-                            <Checkbox
-                              checked={affections.injury}
-                              name="injury"
-                            />
-                          }
-                          label="Lesión o herida"
-                        />
-                        <FormControlLabel
-                          onChange={() => { }}
-                          value={affections.injury}
-                          control={
-                            <Checkbox checked={affections.pain} name="pain" />
-                          }
-                          label="Dolor o malestar general"
-                        />
-                      </FormGroup>
-                    </FormControl>
-                  </Box>
-                </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-around",
-                  }}
-                >
-                  <Box
-                    sx={{
+                      borderRadius: "14px",
+                      fontSize: "20px",
+                      fontWeight: "600px",
                       display: "flex",
                       flexDirection: "row",
-                      alignItems: "center",
-                      paddingX: "25px",
+                      justifyContent: "space-between",
+                      padding: "20px",
                     }}
                   >
-                    <Typography sx={{ fontSize: "20px", paddingRight: "25px" }}>
-                      Edad
-                    </Typography>
-                    <TextField
-                      type="number"
-                      value={state.age}
-                      onChange={(e) =>
-                        dispatch({
-                          type: "UPDATE_AGE",
-                          payload: e.target.value,
-                        })
-                      }
-                      sx={{ width: "300px" }}
-                    />
+                    <Box sx={{ display: "flex", flexDirection: "row", gap: "8px" }}>
+                      <VisibilityOutlinedIcon />
+                      <Typography
+                        sx={{ fontWeight: 600 }}
+                      >{`${appointmentData.fullname} | ${appointmentData.time.split("T")}`}</Typography>
+                    </Box>
                   </Box>
-                  <Box
-                    sx={{
-                      width: "400px",
-                      display: "flex",
-                      flexDirection: "row",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: "20px",
-                        paddingRight: "2rem",
-                        alignSelf: "center",
-                      }}
-                    >
-                      Sexo
-                    </Typography>
-                    <FormControl fullWidth>
-                      <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={state.sex}
-                        onChange={(e) =>
-                          dispatch({
-                            type: "UPDATE_SEX",
-                            payload: e.target.value,
-                          })
-                        }
-                      >
-                        <MenuItem value={2}>Masculino</MenuItem>
-                        <MenuItem value={1}>Femenino</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-                </Box>
-                <Box>
-                  <Typography sx={{ fontSize: "24px", color: "#666565" }}>
-                    Técnico
-                  </Typography>
-                  <Divider sx={{ borderColor: "black" }} />
                   <Box
                     sx={{
                       display: "flex",
                       flexDirection: "column",
-                      gap: 2,
+                      gap: "1rem",
                       paddingTop: "10px",
                     }}
                   >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        paddingX: "25px",
-                      }}
-                    >
-                      <Typography sx={{ fontSize: "20px" }}>
-                        Temperatura Corporal (C)
+                    <Box>
+                      <Typography sx={{ fontSize: "24px", color: "#666565" }}>
+                        {"General"}
                       </Typography>
-                      <TextField
-                        type="number"
-                        value={state.temperature}
-                        onChange={(e) =>
-                          dispatch({
-                            type: "UPDATE_TEMPERATURE",
-                            payload: e.target.value,
-                          })
-                        }
-                        sx={{ width: "300px" }}
-                      />
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        paddingX: "25px",
-                      }}
-                    >
-                      <Typography sx={{ fontSize: "20px" }}>
-                        Presión Arterial Sistólica (mmHg)
-                      </Typography>
-                      <TextField
-                        type="number"
-                        value={state.systolicPressure}
-                        onChange={(e) =>
-                          dispatch({
-                            type: "UPDATE_SYSTOLIC_PRESSURE",
-                            payload: e.target.value,
-                          })
-                        }
-                        sx={{ width: "300px" }}
-                      />
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        paddingX: "25px",
-                      }}
-                    >
-                      <Typography sx={{ fontSize: "20px" }}>
-                        Presión Arterial Diastólica (mmHg)
-                      </Typography>
-                      <TextField
-                        type="number"
-                        value={state.diastolicPressure}
-                        onChange={(e) =>
-                          dispatch({
-                            type: "UPDATE_DIASTOLIC_PRESSURE",
-                            payload: e.target.value,
-                          })
-                        }
-                        sx={{ width: "300px" }}
-                      />
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        paddingX: "25px",
-                      }}
-                    >
-                      <Typography sx={{ fontSize: "20px" }}>
-                        Frecuencia Cardiaca (bpm)
-                      </Typography>
-                      <TextField
-                        type="number"
-                        value={state.heartRate}
-                        onChange={(e) =>
-                          dispatch({
-                            type: "UPDATE_HEART_RATE",
-                            payload: e.target.value,
-                          })
-                        }
-                        sx={{ width: "300px" }}
-                      />
+                      <Divider sx={{ borderColor: "black" }} />
                     </Box>
                     <Box
                       sx={{
                         display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        paddingX: "25px",
-                      }}
-                    >
-                      <Typography sx={{ fontSize: "20px" }}>
-                        Tasa de Respiración (bpm)
-                      </Typography>
-                      <TextField
-                        type="number"
-                        value={state.respirationRate}
-                        onChange={(e) =>
-                          dispatch({
-                            type: "UPDATE_RESPIRATION_RATE",
-                            payload: e.target.value,
-                          })
-                        }
-                        sx={{ width: "300px" }}
-                      />
-                    </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "row",
+                        flexDirection: "column",
                         justifyContent: "space-around",
+                        gap: "2rem",
+                        paddingX: "2rem",
                       }}
                     >
-                      <Button
-                        onClick={onSave}
-                        sx={{
-                          width: "216px",
-                          height: "42px",
-                          backgroundColor: "#D3AD30",
-                          color: "white",
-                          borderRadius: "10px",
-                        }}
-                      >
-                        Guardar
-                      </Button>
-                      <Button
-                        onClick={handleOpenTriageModal}
-                        value={appointmentData}
-                        sx={{
-                          width: "216px",
-                          height: "42px",
-                          backgroundColor: "#115026",
-                          color: "white",
-                          borderRadius: "10px",
-                        }}
-                      >
-                        Enviar a Atención
-                      </Button>
-                      <Button
-                        sx={{
-                          width: "216px",
-                          height: "42px",
-                          backgroundColor: "#FA2424",
-                          color: "white",
-                          borderRadius: "10px",
-                        }}
-                      >
-                        Descartar
-                      </Button>
+                      <Typography sx={{ fontSize: "20px" }}>{"El paciente presenta los siguientes malestares:"}</Typography>
+                      <Box sx={{ backgroundColor: '#EBEBEB', padding: 2, borderRadius: 3, display: "flex", flexDirection: "column", paddingX: "3rem", gap: 2 }}>
+                        {symptomsComponents.length > 0 ? symptomsComponents : (<Typography sx={{ fontSize: "32px" }}>{"El paciente no tiene malestares!"}</Typography>)}
+                      </Box>
+                      <Box sx={{ paddingLeft: "2rem" }}>
+                        <Typography sx={{ fontWeight: "bold" }}>{"Recomendacion del sistema"}</Typography>
+                        <Box sx={{ display: "flex", flexDirection: "row", gap: "6px" }}>
+                          <Typography>{`Caso de tipo ${state.triageStatus}:`}</Typography>
+                          <Typography sx={{
+                            color: state.triageStatus ? StatusColor[StatusNumbers[state.triageStatus]] : "#434343",
+                          }}>{state.triageStatus ? StatusLabels[StatusNumbers[state.triageStatus]] : "Sin Triage"}</Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        gap: "2rem",
+                      }}
+                    >
+                      <Box>
+                        <Typography sx={{ fontSize: "24px", color: "#666565" }}>{"Observaciones"}</Typography>
+                        <Divider sx={{ borderColor: "black" }} />
+                      </Box>
+                      <Box
+                        sx={{ paddingX: "2rem" }}>
+                        <TextareaAutosize
+                          value={observation}
+                          onChange={handleObservation}
+                          style={{
+                            width: "100%",
+                            height: "116px",
+                            borderRadius: "28px",
+                            padding: "10px",
+                          }}
+                        />
+                      </Box>
+                      <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "space-evenly" }}>
+                        <Button onClick={onSave} sx={{ backgroundColor: "#115026", width: "215px", height: "42px", color: "white", borderRadius: "12px" }}>Enviar</Button>
+                        <Button onClick={() => {
+                          setIsAttending(false);
+                          setAppointmentData({});
+                        }} sx={{ backgroundColor: "#FA2424", width: "215px", height: "42px", color: "white", borderRadius: "12px" }}>Descartar</Button>
+                      </Box>
                     </Box>
                   </Box>
-                </Box>
-              </Box>
+                </>
+                :
+                <CircularProgress sx={{ display: "flex", justifyContent: "center" }} />
+              }
             </>
           }
-          {isModifying &&
-            <UpdateAppointment
-              onReturn={() => setIsModifying(false)}
-              fullname={appointmentData.fullname}
-              appointmentId={appointmentData.id}
-            />
-          }
-          {isView && (
-            <WatchAppoinment
-              appointmentId={appointmentData.id}
-              fullname={appointmentData.fullname}
-              time={appointmentData.time}
-              onReturn={() => setIsView(false)}
-            />
-          )}
           {openCancelModal && (
             <CancelAppointmentModal
               open={openCancelModal}
@@ -993,16 +531,6 @@ export const Appointments = () => {
               onCancelInasistance={onCancelInasistance}
               comment={comment}
               handleComment={handleComment}
-            />
-          )}
-          {openTriageModal && (
-            <TriageModal
-              open={openTriageModal}
-              onClose={handleCloseTriageModal}
-              onSend={onSend}
-              date={appointmentData.time}
-              fullname={appointmentData.fullname}
-              status={state.triageStatus}
             />
           )}
           {openSentToAttend && (
@@ -1016,6 +544,7 @@ export const Appointments = () => {
           )}
         </Box>
       </Box>
+      <ToastContainer />
     </Box>
   );
 };

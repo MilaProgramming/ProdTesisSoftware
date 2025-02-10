@@ -11,8 +11,8 @@ import {
   Container,
   MenuItem,
   Select,
-  InputLabel,
   FormControl,
+  InputLabel,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { Link as RouterLink } from "react-router-dom";
@@ -21,6 +21,11 @@ import { environment } from "../utils/evironment";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 
+const documentType = {
+  ci: 'Cedula',
+  passport: 'Pasaporte'
+}
+
 function RegisterPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -28,6 +33,8 @@ function RegisterPage() {
   const [name, setName] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
+  const [DNI, setDNI] = useState("");
+  const [identificationType, setIdentificationType] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -42,6 +49,9 @@ function RegisterPage() {
       name,
       lastname,
       email,
+      role: "paciente",
+      DNI,
+      DNIType: identificationType
     });
     if (response.data.status === 200) {
       toast.success("El registro se realizo con exito!");
@@ -54,6 +64,8 @@ function RegisterPage() {
     setLastname("");
     setEmail("");
     setConfirmPassword("");
+    setDNI("")
+    setIdentificationType("");
     return;
   };
 
@@ -123,6 +135,34 @@ function RegisterPage() {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth >
+                <InputLabel id="identification-type-label">Selecciona el tipo de Documento</InputLabel>
+                <Select
+                  labelId="identification-type-label"
+                  id="identificationType"
+                  name="identificationType"
+                  value={identificationType}
+                  onChange={(e) => setIdentificationType(e.target.value)}
+                  label="Selecciona el tipo de Documento"
+                >
+                  <MenuItem value="ci">Cedula</MenuItem>
+                  <MenuItem value="passport">Pasaporte</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                name="DNI"
+                label="Número de documento de identidad"
+                type="DNI"
+                id="DNI"
+                value={DNI}
+                onChange={(e) => setDNI(e.target.value)}
               />
             </Grid>
             <Grid item xs={12}>

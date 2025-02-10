@@ -8,6 +8,7 @@ import {
   ListItemButton,
   ListItemIcon,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import HomeIcon from "@mui/icons-material/Home";
@@ -18,18 +19,24 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import DomainAddIcon from "@mui/icons-material/DomainAdd";
-import ListAltIcon from "@mui/icons-material/ListAlt";
+import MenuIcon from "@mui/icons-material/Menu";
+import { useTheme } from "@mui/material/styles";
 
 const drawerWidth = 320;
 
 export const CustomDrawer = (props) => {
   const { role, fullname, email } = props;
   const startTime = new Date(Date.now());
-  startTime.setHours(7);
+  startTime.setHours(9);
   const endTime = new Date(Date.now());
   endTime.setHours(18);
   const [status, setStatus] = useState();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const cerrarSesion = () => {
     localStorage.removeItem("session");
     navigate("/");
@@ -37,6 +44,9 @@ export const CustomDrawer = (props) => {
 
   const onClickDrawerOption = (route) => {
     navigate(`/${route}`);
+    if (isMobile) {
+      setMobileOpen(false);
+    }
   };
 
   useEffect(() => {
@@ -46,22 +56,8 @@ export const CustomDrawer = (props) => {
     // eslint-disable-next-line
   }, []);
 
-  return (
-    <Drawer
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        "& .MuiDrawer-paper": {
-          width: drawerWidth,
-          boxSizing: "border-box",
-          backgroundColor: "#E5E4E4",
-          borderRight: "none",
-        },
-        color: "#E5E4E4",
-      }}
-      variant="permanent"
-      anchor="left"
-    >
+  const drawerContent = (
+    <>
       <DomainAddIcon
         sx={{
           fontSize: "60px",
@@ -80,7 +76,7 @@ export const CustomDrawer = (props) => {
             Inicio
           </ListItemButton>
         </ListItem>
-        {role === "paciente" && ( // Mostrar solo si el role es "paciente"
+        {role === "paciente" && (
           <>
             <ListItem>
               <ListItemIcon>
@@ -104,7 +100,7 @@ export const CustomDrawer = (props) => {
             </ListItem>
           </>
         )}
-        {role === "admin" && (
+        {(role === "medical_staff" || role === "doctor") && (
           <>
             <ListItem>
               <ListItemIcon>
@@ -116,22 +112,16 @@ export const CustomDrawer = (props) => {
                 Turnos
               </ListItemButton>
             </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <ListAltIcon />
-              </ListItemIcon>
-              <ListItemButton
-                onClick={() => onClickDrawerOption("appointments-queue")}
-              >
-                Fila de Atención
-              </ListItemButton>
-            </ListItem>
+          </>
+        )}
+        {role === "admin" && (
+          <>
             <ListItem>
               <ListItemIcon>
                 <SettingsIcon />
               </ListItemIcon>
               <ListItemButton onClick={() => onClickDrawerOption("admin")}>
-                Administracion
+                Administración
               </ListItemButton>
             </ListItem>
           </>
@@ -164,7 +154,7 @@ export const CustomDrawer = (props) => {
         </Box>
         <Typography sx={{ alignSelf: "center", textAlign: "center" }}>
           Horario de atención
-          <br /> 7:00 a 18:00
+          <br /> 9:00 a 18:00
         </Typography>
       </Box>
       <Divider />
@@ -195,6 +185,41 @@ export const CustomDrawer = (props) => {
           </IconButton>
         </Box>
       </Box>
-    </Drawer>
+    </>
+  );
+
+  return (
+    <>
+      <Drawer
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: drawerWidth,
+            boxSizing: "border-box",
+            backgroundColor: "#E5E4E4",
+            borderRight: "none",
+          },
+          color: "#E5E4E4",
+        }}
+        variant={isMobile ? "temporary" : "permanent"}
+        anchor="left"
+        open={!isMobile || mobileOpen}
+        onClose={() => setMobileOpen(false)}
+      >
+        {drawerContent}
+      </Drawer>
+      {isMobile && (
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
+          onClick={() => setMobileOpen(true)}
+          sx={{ mr: 2, display: { sm: "none" } }}
+        >
+          <MenuIcon />
+        </IconButton>
+      )}
+    </>
   );
 };

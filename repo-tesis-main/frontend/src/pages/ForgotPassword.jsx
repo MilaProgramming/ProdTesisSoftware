@@ -10,14 +10,13 @@ import {
   Container,
 } from '@mui/material';
 
-import {Link as RouterLink} from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 
 function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // Aquí puedes agregar la lógica para manejar la recuperación de contraseña
     console.log('Email:', email);
   };
 

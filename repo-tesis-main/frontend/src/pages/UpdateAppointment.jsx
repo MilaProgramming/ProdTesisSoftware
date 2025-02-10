@@ -17,7 +17,7 @@ import "../css/SetAppointmentButtons.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { environment } from "../utils/evironment";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -35,7 +35,7 @@ export const UpdateAppointment = ({ appointmentId, onReturn, fullname }) => {
   };
 
   const handleUpdateBtn = async () => {
-    const formatDateTime = `${appointmentDate.year()}-${appointmentDate.month() < 10 ? "0" + (appointmentDate.month() + 1) : appointmentDate.month() + 1}-${appointmentDate.date()}T${appointmentTime.hour()<10?"0"+appointmentTime.hour():appointmentTime.hour()}:${appointmentTime.minute()}`
+    const formatDateTime = `${appointmentDate.year()}-${appointmentDate.month() < 10 ? "0" + (appointmentDate.month() + 1) : appointmentDate.month() + 1}-${appointmentDate.date()}T${appointmentTime.hour()}:${appointmentTime.minute()}`
     const response = await axios.put(
       `${environment.apiUrl}/appointments/`,
       {
@@ -59,7 +59,7 @@ export const UpdateAppointment = ({ appointmentId, onReturn, fullname }) => {
       setAppointmentDate(dayjs(data[0]))
     }
     getOldDate()
-  }, []);
+  }, [appointmentId, navigate]);
 
   return (
     <>
@@ -154,6 +154,7 @@ export const UpdateAppointment = ({ appointmentId, onReturn, fullname }) => {
           Modificar
         </Button>
       </Box>
+      <ToastContainer />
     </>
   );
 };

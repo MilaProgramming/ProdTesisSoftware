@@ -1,46 +1,67 @@
 import { Button, Divider, Paper, TextareaAutosize, Typography, Box, List, ListItem, ListItemText, ListItemIcon, IconButton } from "@mui/material";
-import React, { useState, useContext, useEffect } from "react";
-import SessionContext from "../context/SessionContext";
-import { CustomDrawer } from "../components/Drawer/CustomDrawer";
+import React, { useState } from "react";
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import axios from "axios";
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import dayjs from 'dayjs';
 import 'dayjs/locale/es'; // Importa la localización en español
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import { environment } from "../utils/evironment";
+import { CancelAppointmentModal } from "../components/CancelAppointmentModal/CancelAppointmentModal";
+
+const appointmentStatusLabels = {
+  "pending": "Pendiente",
+  "finished": "Finalizado",
+  "canceled": "Cancelado",
+}
 
 export const AppointmentDetails = ({ appointmentData, onReturn }) => {
 
   dayjs.locale('es'); // Configura dayjs para usar español
 
-  const [appt, setAppt] = useState(appointmentData);
-
-  const [medicalHistory, setMedicalHistory] = useState({
-    id: 5,
-    diagnostic: "blablablblablablablblablablablbla",
-    medications: "blablablblablablablbla",
-    instructions: "blablablblablablablblablablablbla",
-    userId: 3,
-  });
-
-  const formattedDate = dayjs(appt.appointmentDate).format('DD [de] MMMM'); // Formatea la fecha
-  const formattedHour = dayjs(appt.appointmentDate).format('HH:mm'); // Formatea la hora
-  const [note, setNote] = useState("Observacion que trae back");
+  const formattedDate = dayjs(appointmentData.appointmentDate).format('DD [de] MMMM'); // Formatea la fecha
+  const formattedHour = dayjs(appointmentData.appointmentDate).format('HH:mm'); // Formatea la hora
+  const note = appointmentData.observations
 
   const getColorByState = (state) => {
     switch (state) {
       case 'pending':
         return '#115026';
-      case 'finish':
+      case 'finished':
         return '#E0C80C';
-      case 'cancel':
+      case 'canceled':
         return '#E00C0C';
       default:
         return '#3b1150';
     }
   };
 
+  const [openCancelModal, setOpenCancelModal] = useState(false);
+
+  const [comment, setComment] = useState("");
+
+  const handleCloseCancelModal = () => setOpenCancelModal(false);
+
+  const handleOpenCancelModal = () => {
+    setOpenCancelModal(true)
+  };
+
+  const handleComment = (event) => {
+    setComment(event.target.value);
+  };
+
   const handleCancel = () => {
+    const cancel = async () => {
+      const observations = comment === "" ? "Cancelado por el usuario" : comment;
+      const cancelResponse = await axios.put(`${environment.apiUrl}/appointments/${appointmentData.id}/canceled?observations=${observations}`);
+      if (cancelResponse.status === 200) {
+        toast.success("Cita cancelada exitosamente")
+        onReturn();
+      } else {
+        toast.error(cancelResponse.data.detail)
+      }
+    }
+    cancel();
   };
 
   return (
@@ -112,7 +133,7 @@ export const AppointmentDetails = ({ appointmentData, onReturn }) => {
           <Box
             sx={{
               borderRadius: 1,
-              bgcolor: getColorByState(appt.appointmentStatus),
+              bgcolor: getColorByState(appointmentData.appointmentStatus),
               color: "white",
               textAlign: "center",
               width: "100px",
@@ -122,7 +143,7 @@ export const AppointmentDetails = ({ appointmentData, onReturn }) => {
             }}
           >
             <Typography variant="body2">
-              {appt.appointmentStatus}
+              {appointmentStatusLabels[appointmentData.appointmentStatus]}
             </Typography>
           </Box>
         </Box>
@@ -141,35 +162,10 @@ export const AppointmentDetails = ({ appointmentData, onReturn }) => {
           />
         </Box>
       </Box>
-      <div>
+      <Box>
         {
           (() => {
-            switch (appt.appointmentStatus) {
-              case "finish":
-                return (
-                  <div sx={{ padding: "10px" }}>
-                    <Typography variant="h6" gutterBottom>
-                      Historial médico:
-                    </Typography>
-                    <Paper
-                      sx={{
-                        padding: 2,
-                        border: "1px solid black",
-                        borderRadius: 6,
-                      }}
-                    >
-                      <Typography variant="body1" color="black">
-                        <span style={{ color: 'green' }}>Diagnóstico:</span> {medicalHistory.diagnostic}
-                      </Typography>
-                      <Typography variant="body1" color="black">
-                        <span style={{ color: 'green' }}>Medicamento:</span> {medicalHistory.medications}
-                      </Typography>
-                      <Typography variant="body1" color="black">
-                        <span style={{ color: 'green' }}>Indicaciones:</span> {medicalHistory.instructions}
-                      </Typography>
-                    </Paper>
-                  </div>
-                );
+            switch (appointmentData.appointmentStatus) {
               case "pending":
                 return (
                   <div sx={{ padding: "10px" }}>
@@ -178,7 +174,7 @@ export const AppointmentDetails = ({ appointmentData, onReturn }) => {
                       color: "white",
                       textAlign: "center",
                       marginTop: "40px"
-                    }} onClick={handleCancel}>
+                    }} onClick={handleOpenCancelModal}>
                       Cancelar
                     </Button>
                   </div>
@@ -188,7 +184,17 @@ export const AppointmentDetails = ({ appointmentData, onReturn }) => {
             }
           })()
         }
-      </div>
+      </Box>
+      {openCancelModal && (
+        <CancelAppointmentModal
+          open={openCancelModal}
+          onClose={handleCloseCancelModal}
+          onCancel={handleCancel}
+          comment={comment}
+          handleComment={handleComment}
+        />
+      )}
+      <ToastContainer />
     </>
   );
 };

@@ -44,7 +44,6 @@ def changeUserRole(userId: str, userRole: str):
         register_use_case = RegisterUseCase(
             register_repository
         )
-        print(userId)
         register_use_case.changeUserRole(
             userId=userId, userRole=userRole)
         return {

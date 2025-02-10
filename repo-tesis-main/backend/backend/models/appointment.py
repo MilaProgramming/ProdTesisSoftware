@@ -20,11 +20,17 @@ class Appointment(BaseModel):
 
     id: Optional[int] = None
     appointmentStatus: str
+    appointmentType: str
     appointmentDate: datetime
     userId: Optional[int] = None
-    affections: Affections = None
     observations: str = None
-    painLevel: int = None
+    headache: Optional[int] = 0
+    temperature: Optional[int] = 0
+    stomachache: Optional[int] = 0
+    generalMalaise: Optional[int] = 0
+    burningThroat: Optional[int] = 0
+    theresWound: Optional[int] = 0
+    appointmentType: str
 
     def user_dict(self):
         return {
@@ -72,29 +78,25 @@ class DetailedAppointment(BaseModel):
 
 
 class AppointmentDetails(BaseModel):
-    observations: Optional[str] = None
-    diagnostic: Optional[str] = None
-    prescription: Optional[str] = None
-    indications: Optional[str] = None
+    observations: Optional[str]
+    triageStatus: Optional[int]
+    headache: Optional[int]
+    temperature: Optional[int]
+    stomachache: Optional[int]
+    generalMalaise: Optional[int]
+    burningThroat: Optional[int]
+    theresWound: Optional[int]
     appointmentId: Optional[int] = None
-    generalAffections: Optional[dict] = None
-    painLevel: Optional[int] = None
-    vitalSigns: Optional[dict] = None
-    triageStatus: Optional[str] = None
-    patientStatus: Optional[int] = None
-    theresLession: Optional[int] = None
 
     def to_dict(self):
         return {
             "observations": self.observations,
-            "diagnostic": self.diagnostic,
-            "prescription": self.prescription,
-            "indications": self.indications,
             "appointmentId": self.appointmentId,
-            "generalAffections": self.generalAffections,
-            "painLevel": self.painLevel,
-            "vitalSigns": self.vitalSigns,
             "triageStatus": self.triageStatus,
-            "patientStatus": self.patientStatus,
-            "theresLession": self.theresLession,
+            "headache": self.headache,
+            "temperature": self.temperature,
+            "stomachache": self.stomachache,
+            "generalMalaise": self.generalMalaise,
+            "burningThroat": self.burningThroat,
+            "theresWound": self.theresWound,
         }

@@ -1,36 +1,35 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Box, Divider, Typography } from "@mui/material";
-import { CustomCalendar } from "../components/CustomCalendar/CustomCalendar";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import React from "react";
+import { Box, Button, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import infoIcon from "../assets/infoIcon.png";
-import axios from "axios";
-import SessionContext from "../context/SessionContext";
-import { environment } from "../utils/evironment";
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import WaterDropIcon from '@mui/icons-material/WaterDrop';
+import VaccinesIcon from '@mui/icons-material/Vaccines';
+import AirlineSeatLegroomReducedIcon from '@mui/icons-material/AirlineSeatLegroomReduced';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+
+const buttonStyles = {
+  backgroundColor: "#E3FDE8",
+  color: "#115026",
+  borderRadius: "12px",
+  padding: "20px",
+  margin: "10px",
+  width: "400px",
+  justifyContent: "flex-start"
+};
+
+const iconStyles = {
+  marginRight: 1,
+  color: "black"
+}
 
 export const PatientView = () => {
-  const [appointmentDates, setAppointmentDates] = useState([]);
-  const [areAppointmentsLoaded, setAreAppointmentsLoaded] = useState(true);
-  const { user } = useContext(SessionContext);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const getAppointmentDates = async () => {
-      try {
-        const response = await axios.get(
-          `${environment.apiUrl}/appointments/${user.username}`
-        );
-        const dates = response.data.map((appointment) => {
-          return new Date(appointment.appointmentDate);
-        });
-        setAppointmentDates(dates);
-      } catch (error) {
-        console.error("Error al obtener las fechas de las citas:", error);
-      } finally {
-        setAreAppointmentsLoaded(false);
-      }
-    };
-    getAppointmentDates();
-    // eslint-disable-next-line
-  }, []);
+  const onClickOptionButton = (option) => {
+    navigate('/set-appointment', { state: { appointmentType: option.target.value } });
+  }
+
 
   return (
     <Box
@@ -42,106 +41,107 @@ export const PatientView = () => {
         borderRadius: "10px",
         display: "flex",
         flexDirection: "column",
+        overflowY: "auto",
+        height: "100vh",
+        gap: "5em",
       }}
     >
-      <Typography
-        sx={{ fontSize: "60px", lineHeight: "1", letterSpacing: "0" }}
-      >
-        {"Bienvenido"}
-      </Typography>
-      <Typography
-        sx={{
-          fontSize: "20px",
-          color: "#747474",
-          paddingBottom: "30px",
-          paddingTop: "15px",
-          lineHeight: "1",
-        }}
-      >
-        {"¿En que podemos ayudarte?"}
-      </Typography>
-      <Box
-        sx={{
-          width: "auto",
-          display: "flex",
-          flexDirection: "row",
-          backgroundColor: "#CCE5D0",
-          borderRadius: "40px",
-          padding: "30px",
-          alignItems: "center",
-          alignSelf: "center",
-        }}
-      >
+      <Box>
         <Typography
-          sx={{ fontSize: "28px", paddingRight: "240px", paddingLeft: "60px" }}
+          sx={{ fontSize: "60px", lineHeight: "1", letterSpacing: "0" }}
         >
-          {
-            "Si deseas ser atendido en el centro médico, solicita un turno ahora, o agéndalo para el futuro."
-          }
+          {"Bienvenido"}
         </Typography>
-        <img
-          alt="Icono de monitor"
-          src={infoIcon}
-          style={{ paddingLeft: "30px", paddingRight: "120px" }}
-        />
-      </Box>
-      <Typography sx={{ paddingTop: "26px", fontSize: "40px" }}>
-        {"Próximos turnos"}
-      </Typography>
-      <Divider sx={{ borderColor: "black" }} />
-      {!areAppointmentsLoaded && (
-        <Box
+        <Typography
           sx={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
+            fontSize: "20px",
+            color: "#747474",
+            paddingBottom: "30px",
+            paddingTop: "15px",
+            lineHeight: "1",
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              paddingTop: "25px",
-            }}
+          {"¿En que podemos ayudarte?"}
+        </Typography>
+      </Box>
+      <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "space-around" }}>
+        <Box sx={{ display: "flex", flexDirection: "column" }}>
+          <Button
+            value="appointment"
+            onClick={onClickOptionButton}
+            sx={{ ...buttonStyles }}
           >
-            {appointmentDates.length > 0 ? (
-              appointmentDates.map((item, index) => {
-                return (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "row",
-                      paddingBottom: "20px",
-                    }}
-                    key={index + "-box"}
-                  >
-                    <AccessTimeIcon sx={{ height: "70px", width: "auto" }} />
-                    <Typography sx={{ fontSize: "40px", alignSelf: "center" }}>
-                      {item.toLocaleString()}
-                    </Typography>
-                  </Box>
-                );
-              })
-            ) : (
-              <Box sx={{ display: "flex", flexDirection: "row" }}>
-                <AccessTimeIcon sx={{ height: "70px", width: "auto" }} />
-                <Typography sx={{ fontSize: "40px", alignSelf: "center" }}>
-                  No existen turnos pendientes.
-                </Typography>
-              </Box>
-            )}
-          </Box>
-          <CustomCalendar
-            appointmentDates={appointmentDates.map((date) => {
-              return new Date(
-                date.getFullYear(),
-                date.getMonth(),
-                date.getDate()
-              );
-            })}
-          />
+            <ScheduleIcon sx={{ ...iconStyles }} />
+            Agendar Cita
+          </Button>
+          <Button
+            value="vitalSignes"
+            onClick={onClickOptionButton}
+            sx={{ ...buttonStyles }}
+          >
+            <WaterDropIcon sx={{ ...iconStyles }} />
+            Toma de signos vitales
+          </Button>
+          <Button
+            value="injection"
+            onClick={onClickOptionButton}
+            sx={{ ...buttonStyles }}
+          >
+            <VaccinesIcon sx={{ ...iconStyles }} />
+            Aplicación de inyecciones
+          </Button>
+          <Button
+            value="desinfection"
+            onClick={onClickOptionButton}
+            sx={{ ...buttonStyles }}
+          >
+            <AirlineSeatLegroomReducedIcon sx={{ ...iconStyles }} />
+            Desinfección de heridas
+          </Button>
+          <Button
+            value="certificate"
+            onClick={onClickOptionButton}
+            sx={{ ...buttonStyles }}
+          >
+            <InsertDriveFileIcon sx={{ ...iconStyles }} />
+            Validar certificado médico
+          </Button>
         </Box>
-      )}
+        <Box
+          sx={{
+            width: "auto",
+            display: "flex",
+            flexDirection: "column",
+            backgroundColor: "#CCE5D0",
+            borderRadius: "40px",
+            padding: "30px",
+            alignItems: "center",
+            alignSelf: "center",
+            height: "fit-content",
+          }}
+        >
+          <img
+            alt="Icono de monitor"
+            src={infoIcon}
+          />
+          <Typography sx={{ fontSize: "1.5em", fontWeight: "bold" }}>
+            {"Atención"}
+          </Typography>
+
+          <Typography
+            sx={{ fontSize: "1em", marginTop: 2 }}
+          >
+            {
+              "Si te encuentras ante un caso grave, contacta a los números de emergencia:"
+            }
+          </Typography>
+          <Typography variant="body1" sx={{ textAlign: 'center', marginTop: 2 }}>
+            <span style={{ fontWeight: 'bold' }}>911</span> Emergencias<br />
+            <span style={{ fontWeight: 'bold' }}>131</span> Cruz Roja<br />
+            <span style={{ fontWeight: 'bold' }}>102</span> Bomberos
+          </Typography>
+        </Box>
+      </Box>
     </Box>
   );
 };

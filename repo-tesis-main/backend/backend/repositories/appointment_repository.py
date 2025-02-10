@@ -16,7 +16,7 @@ class IAppointmentRepository(ABC):
         raise NotImplementedError
 
     @abstractclassmethod
-    def create(self, appointment: Appointment, username: str):
+    def create(self, appointment: Appointment, username: str, newUserFromAppointment: bool):
         raise NotImplementedError
 
     @abstractclassmethod
@@ -24,7 +24,7 @@ class IAppointmentRepository(ABC):
         raise NotImplementedError
 
     @abstractclassmethod
-    def changeAppointmentStatus(self, appointmentId: str, appointmentStatus: str):
+    def changeAppointmentStatus(self, appointmentId: str, appointmentStatus: str, observations: str):
         raise NotImplementedError
 
     @abstractclassmethod
@@ -41,4 +41,8 @@ class IAppointmentRepository(ABC):
 
     @abstractclassmethod
     def updateAppointment(self, appointmentTime: AppointmentTime):
+        raise NotImplementedError
+
+    @abstractclassmethod
+    def getAppointmentTimes(self, appointmentType: str, date: str):
         raise NotImplementedError

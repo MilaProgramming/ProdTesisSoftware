@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import {
   Box,
   Divider,
@@ -20,7 +19,7 @@ import "../css/SetAppointmentButtons.css";
 import SessionContext from "../context/SessionContext";
 import axios from "axios";
 import { environment } from "../utils/evironment";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 export const RoleManagement = () => {
   const { user } = useContext(SessionContext);
@@ -52,14 +51,15 @@ export const RoleManagement = () => {
     ));
 
     const changeRole = async (usuarioId, nuevoRol) => {
-      axios.put(`${environment.apiUrl}/register/${usuarioId}/${nuevoRol}`);
+      const response = await axios.put(`${environment.apiUrl}/register/${usuarioId}/${nuevoRol}`);
+      if (response.data.status === 200) {
+        toast.success("Rol cambiado exitosamente!");
+      } else {
+        toast.error("El rol no fue modificado.");
+      }
     };
-    const response = changeRole(usuarioId, nuevoRol); //aqui no se que ondas AJJAAJAJ 
-    if (response.status === 200) {
-      toast.success("Rol cambiado exitosamente!");
-    } else {
-      toast.error("El rol no fue modificado.");
-    }
+    changeRole(usuarioId, nuevoRol); //aqui no se que ondas AJJAAJAJ 
+
     setNeedsToBeReloaded(true)
   };
 
@@ -87,12 +87,14 @@ export const RoleManagement = () => {
             borderRadius: "10px",
             display: "flex",
             flexDirection: "column",
+            overflow: "auto",
+            height: "100vh",
           }}
         >
           <Typography
             sx={{ fontSize: "48px", lineHeight: "1", letterSpacing: "0" }}
           >
-            {"Administrción de Roles"}
+            {"Administración de Roles"}
           </Typography>
           <Divider sx={{ borderColor: "black", paddingTop: "13px", marginBottom: "10px" }} />
           <TableContainer component={Paper}>
@@ -117,7 +119,9 @@ export const RoleManagement = () => {
                           onChange={(e) => handleChangeRol(usuario.id, e.target.value)}
                         >
                           <MenuItem value="paciente">Paciente</MenuItem>
-                          <MenuItem value="admin">Doctor</MenuItem>
+                          <MenuItem value="medical_staff">Personal Médico</MenuItem>
+                          <MenuItem value="doctor">Doctor</MenuItem>
+                          <MenuItem value="admin">Administrador</MenuItem>
                           {/* Agrega más roles según tus necesidades */}
                         </Select>
                       </FormControl>
@@ -129,6 +133,7 @@ export const RoleManagement = () => {
           </TableContainer>
         </Box>
       </Box>
+      <ToastContainer />
     </Box>
   );
 };

@@ -16,21 +16,20 @@ def getAll(username: str):
             appointment_repository
         )
         data = appointment_use_case.getAll(username)
-        serializedData = [vars(appointment) for appointment in data]
-        return serializedData
+        return data
     except HTTPException as ex:
         logging.error(msg={"error": ex.detail})
         raise ex
 
 
-def create(appointment: Appointment, username: str):
+def create(appointment: Appointment, username: str, newUserFromAppointment: bool):
     try:
         appointment_repository = AppointmentsRepository()
         appointment_use_case = AppointmentUseCase(
             appointment_repository
         )
         response = appointment_use_case.create(
-            appointment=appointment, username=username)
+            appointment=appointment, username=username, newUserFromAppointment=newUserFromAppointment)
         return response
     except HTTPException as ex:
         logging.error(msg={"error": ex.detail})
@@ -55,14 +54,14 @@ def getAppointmentDetails(appointmentId: str):
         raise ex
 
 
-def changeAppointmentStatus(appointmentId: str, appointmentStatus: str):
+def changeAppointmentStatus(appointmentId: str, appointmentStatus: str, observations: str):
     try:
         appointment_repository = AppointmentsRepository()
         appointment_use_case = AppointmentUseCase(
             appointment_repository
         )
         appointment_use_case.changeAppointmentStatus(
-            appointmentId=appointmentId, appointmentStatus=appointmentStatus)
+            appointmentId=appointmentId, appointmentStatus=appointmentStatus, observations=observations)
         return {
             "status": HTTPStatus.OK,
             "message": "Appointment status changed succesfully"
@@ -137,6 +136,24 @@ def updateAppointment(appointmentTime: AppointmentTime):
             "status": HTTPStatus.OK,
             "message": "Appointment details changed succesfully",
             "appointments": response
+        }
+    except HTTPException as ex:
+        logging.error(msg={"error": ex.detail})
+        raise ex
+
+
+def getAppointmentTimes(appointmentType: str, date: str):
+    try:
+        appointment_repository = AppointmentsRepository()
+        appointment_use_case = AppointmentUseCase(
+            appointment_repository
+        )
+        response = appointment_use_case.getAppointmentTimes(
+            appointmentType, date)
+        return {
+            "status": HTTPStatus.OK,
+            "message": "Appointment dates retrieved succesfully",
+            "appointmentDates": response
         }
     except HTTPException as ex:
         logging.error(msg={"error": ex.detail})

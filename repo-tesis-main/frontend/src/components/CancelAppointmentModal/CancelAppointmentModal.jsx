@@ -38,7 +38,12 @@ export const CancelAppointmentModal = ({
 }) => {
   const [userInfo, setUserInfo] = useState({});
   useEffect(() => {
-    setUserInfo(JSON.parse(localStorage.getItem("appointment")));
+    console.log(onCancelInasistance)
+    if (localStorage.getItem("appointment") !== null) {
+      setUserInfo(JSON.parse(localStorage.getItem("appointment")));
+    } else {
+      setUserInfo({ id: "" });
+    }
   }, []);
 
   if (!open) return null;
@@ -54,19 +59,23 @@ export const CancelAppointmentModal = ({
         <Typography sx={{ fontSize: "36px" }}>
           {"Estás a punto de cancelar el turno:"}
         </Typography>
-        <Box
-          sx={{ alignSelf: "center", display: "flex", flexDirection: "row" }}
-        >
-          <WatchLaterIcon sx={{ fontSize: "65px" }} />
-          <Box sx={{ display: "flex", flexDirection: "column" }}>
-            <Typography sx={{ color: "black", fontSize: "24px" }}>
-              {userInfo.time}
-            </Typography>
-            <Typography sx={{ color: "#938D8D", fontSize: "24px" }}>
-              {userInfo.fullname}
-            </Typography>
+        {userInfo.id !== "" && (
+          <Box
+            sx={{ alignSelf: "center", display: "flex", flexDirection: "row" }}
+          >
+            <WatchLaterIcon sx={{ fontSize: "65px" }} />
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              <Typography sx={{ color: "black", fontSize: "24px" }}>
+                {userInfo.time}
+              </Typography>
+              <Typography sx={{ color: "#938D8D", fontSize: "24px" }}>
+                {userInfo.fullname}
+              </Typography>
+            </Box>
           </Box>
-        </Box>
+        )
+
+        }
         <Box
           sx={{
             display: "flex",
@@ -76,7 +85,7 @@ export const CancelAppointmentModal = ({
         >
           <Button
             flex={1}
-            value={userInfo.id}
+            value={userInfo.id || ""}
             sx={{
               backgroundColor: "#A02211",
               borderRadius: "10px",
@@ -88,20 +97,23 @@ export const CancelAppointmentModal = ({
           >
             Cancelar Turno
           </Button>
-          <Button
-            flex={1}
-            value={userInfo.id}
-            sx={{
-              backgroundColor: "#A02211",
-              borderRadius: "10px",
-              height: "42px",
-              width: "275px",
-              color: "white",
-            }}
-            onClick={onCancelInasistance}
-          >
-            Cancelar por Inasistencia
-          </Button>
+          {onCancelInasistance !== undefined && (
+            <Button
+              flex={1}
+              value={userInfo.id || ""}
+              sx={{
+                backgroundColor: "#A02211",
+                borderRadius: "10px",
+                height: "42px",
+                width: "275px",
+                color: "white",
+              }}
+              onClick={onCancelInasistance}
+            >
+              Cancelar por Inasistencia
+            </Button>
+          )
+          }
         </Box>
         <Box align={"center"}>
           <Typography sx={{ fontSize: "24px" }}>
@@ -114,6 +126,8 @@ export const CancelAppointmentModal = ({
               width: "440px",
               height: "116px",
               borderRadius: "28px",
+              paddingLeft: "24px",
+              paddingTop: "8px"
             }}
           />
         </Box>

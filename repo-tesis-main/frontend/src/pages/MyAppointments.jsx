@@ -4,62 +4,26 @@ import SessionContext from "../context/SessionContext";
 import { CustomDrawer } from "../components/Drawer/CustomDrawer";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from "axios";
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { environment } from "../utils/evironment";
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import { AppointmentDetails } from "./AppointmentDetails";
+import { ToastContainer } from "react-toastify";
+
+const appointmentStatusLabels = {
+  "pending": "Pendiente",
+  "finished": "Finalizado",
+  "canceled": "Cancelado",
+}
 
 export const MyAppointments = () => {
   const { user } = useContext(SessionContext);
-  //   const user = {
-  //     role: "paciente",
-  //     fullname: "Pepe Pepito",
-  //     email: "pepito@gmail.com"
-  // };
   dayjs.locale('es');
-  const [currentApptOption, setCurrentApptOption] = useState("pending");
+  const [, setCurrentApptOption] = useState("pending");
   const [currentActiveButtonClass, setCurrentActiveButtonClass] = useState(0);
-  const [isView, setIsView] = useState([]);
+  const [isView, setIsView] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState([]);
-  const [appts, setAppts] = useState([
-    {
-      "id": 5,
-      "appointmentStatus": "peding",
-      "appointmentDate": "2025-01-15T13:00:00",
-      "userId": 3
-    },
-    {
-      "id": 6,
-      "appointmentStatus": "finish",
-      "appointmentDate": "2025-01-22T14:00:00",
-      "userId": 3
-    },
-    {
-      "id": 28,
-      "appointmentStatus": "cancel",
-      "appointmentDate": "2025-01-16T12:15:00",
-      "userId": 3
-    },
-    {
-      "id": 30,
-      "appointmentStatus": "finish",
-      "appointmentDate": "2025-02-01T15:30:00",
-      "userId": 3
-    },
-    {
-      "id": 33,
-      "appointmentStatus": "pending",
-      "appointmentDate": "2025-02-04T15:30:00",
-      "userId": 3
-    },
-    {
-      "id": 34,
-      "appointmentStatus": "cancel",
-      "appointmentDate": "2025-02-05T15:30:00",
-      "userId": 3
-    }
-  ]);
+  const [appts, setAppts] = useState([]);
 
   useEffect(() => {
     const getAppointments = async () => {
@@ -76,7 +40,7 @@ export const MyAppointments = () => {
     };
     getAppointments();
     // eslint-disable-next-line
-  }, []);
+  }, [isView]);
 
   // Función para manejar los clics de los botones
 
@@ -94,9 +58,7 @@ export const MyAppointments = () => {
       case 0:
         return appts.filter((appt) => appt.appointmentStatus === 'pending');
       case 1:
-        return appts.filter((appt) => appt.appointmentStatus === 'finish');
-      case 2:
-        return appts;
+        return appts.filter((appt) => appt.appointmentStatus === 'finished');
       default:
         return appts;
     }
@@ -106,9 +68,9 @@ export const MyAppointments = () => {
     switch (state) {
       case 'pending':
         return '#115026';
-      case 'finish':
+      case 'finished':
         return '#E0C80C';
-      case 'cancel':
+      case 'canceled':
         return '#E00C0C';
       default:
         return '#3b1150';
@@ -139,6 +101,8 @@ export const MyAppointments = () => {
             borderRadius: "10px",
             display: "flex",
             flexDirection: "column",
+            height: "100vh",
+            overflowY: "auto",
           }}
         >
           {!isView && (
@@ -246,18 +210,19 @@ export const MyAppointments = () => {
               <Box
                 sx={{
                   width: "100%",
-                  height: 300,
+                  height: "auto",
                   overflowY: "auto",
                   mt: 2,
                 }}
               >
-                <List>
+                <List sx={{ width: "100%" }}>
                   {getApptsByState().map((appt) => (
                     <ListItem
                       sx={{
                         backgroundColor: "#EBEBEB",
                         borderRadius: "12px",
                         marginBottom: "10px",
+                        cursor: "pointer"
                       }}
                       key={appt.id} button onClick={() => handleCitaClick(appt)}>
                       <ListItemIcon
@@ -286,7 +251,7 @@ export const MyAppointments = () => {
                               cursor: "pointer"
                             }}
                           >
-                            <Typography>{appt.appointmentStatus}</Typography>
+                            <Typography>{appointmentStatusLabels[appt.appointmentStatus]}</Typography>
                           </Box>
                         }
                       />
@@ -299,13 +264,7 @@ export const MyAppointments = () => {
           {isView && (<AppointmentDetails appointmentData={selectedAppointment} onReturn={() => setIsView(false)} />)}
         </Box>
       </Box>
+      <ToastContainer />
     </Box>
   );
 };
-
-
-/*caja para los bonotes*/
-/*caja blanca que no sirve para nada*/
-/*caja que tiene el titulo*/
-/*caja de main*/
-/*caja gigante blanca*/

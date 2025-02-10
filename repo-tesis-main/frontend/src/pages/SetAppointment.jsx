@@ -2,61 +2,134 @@ import dayjs from "dayjs";
 import {
   Box,
   Button,
-  Checkbox,
   Divider,
   FormControl,
-  FormControlLabel,
-  FormGroup,
-  Radio,
-  RadioGroup,
+  MenuItem,
+  Select,
   TextareaAutosize,
   Typography,
 } from "@mui/material";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useReducer, useState } from "react";
 import { CustomDrawer } from "../components/Drawer/CustomDrawer";
-import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import InfoIcon from "@mui/icons-material/Info";
 import "../css/SetAppointmentButtons.css";
-import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
-import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import SessionContext from "../context/SessionContext";
 import { ConfirmAppointmentModal } from "../components/ConfirmAppointmentModal/ConfirmAppointmentModal";
 import axios from "axios";
 import { environment } from "../utils/evironment";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import { styled } from '@mui/material/styles';
+import { Affections } from "../components/Affections/Affections";
+
+const initialStateAffections = {
+  headache: { checked: false, value: 0 },
+  temperature: { checked: false, value: 0 },
+  stomachache: { checked: false, value: 0 },
+  disconfort: { checked: false, value: 0 },
+  burningThroat: { checked: false, value: 0 },
+  theresWound: { checked: false, value: false },
+};
+
+const reducerAffections = (state, action) => {
+  switch (action.type) {
+    case 'TOGGLE_CHECKBOX':
+      return { ...state, [action.payload]: { ...state[action.payload], checked: !state[action.payload].checked } };
+    case 'UPDATE_SLIDER':
+      return { ...state, [action.payload.option]: { ...state[action.payload.option], value: action.payload.value } };
+    case 'RESET_STATE':
+      return initialStateAffections;
+    default:
+      return state;
+  }
+};
+
+const setTheresWound = (value) => {
+  if (value) {
+    return 2;
+  } else {
+    return 1;
+  }
+}
 
 export const SetAppointment = () => {
   const [appointmentTime, setAppointmentTime] = useState();
+  const [availableTimesComponents, setAvailableTimesComponents] = useState([]);
   const [appointmentOption, setAppointmentOption] = useState("today");
   const [todayButtonClass, setTodayButtonClass] = useState(true);
   const [otherDayButtonClass, setOtherDayButtonClass] = useState(false);
   const [appointmentDate, setAppointmentDate] = useState(dayjs(Date.now()));
-  const [affections, setAffections] = React.useState({
-    fever: false,
-    injury: false,
-    pain: false,
-  });
-  const [painLevel, setPainLevel] = useState(0);
+  const [stateAffections, dispatchAffections] = useReducer(reducerAffections, initialStateAffections)
   const [commentForNurse, setCommentForNurse] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [appointmentScheduled, setAppointmentScheduled] = useState(false);
+  const location = useLocation();
+  const [actButtonReason, setActButtonReason] = useState("appointment");
   const { user } = useContext(SessionContext);
   const navigate = useNavigate();
 
-  const handleCheckbox = (event) => {
-    setAffections({
-      ...affections,
-      [event.target.name]: event.target.checked,
-    });
+  useEffect(() => {
+    if (location.state && location.state.appointmentType) {
+      setActButtonReason(location.state.appointmentType);
+    }
+  }, []);
+
+  const handleCheckboxChange = (option) => {
+    dispatchAffections({ type: 'TOGGLE_CHECKBOX', payload: option });
+    if (stateAffections[option].checked && option === 'headache') {
+      dispatchAffections({ type: 'UPDATE_SLIDER', payload: { option: option, value: 1 } })
+    } else if (!stateAffections[option].checked && option === 'headache') {
+      dispatchAffections({ type: 'UPDATE_SLIDER', payload: { option: option, value: 0 } })
+    }
   };
 
-  const handleRadio = (event) => {
-    setPainLevel(event.target.value);
+  const getAvailableTimes = async () => {
+    const response = await axios.get(`${environment.apiUrl}/appointments/dates/${actButtonReason}/${appointmentDate.format("YYYY-MM-DD")}`);
+    const newTime = dayjs().hour(Number(response.data.appointmentDates[0].split(":")[0])).minute(Number(response.data.appointmentDates[0].split(":")[1])).second(0)
+
+    setAppointmentTime(newTime)
+    if (response.data.status === 200) {
+      setAvailableTimesComponents(response.data.appointmentDates.map((time) => {
+        return (
+          <MenuItem key={time} value={time}>
+            {time}
+          </MenuItem>
+        );
+      }))
+    }
+  };
+
+  useEffect(() => {
+    getAvailableTimes();
+    // eslint-disable-next-line
+  }, [appointmentDate, actButtonReason]);
+
+  const handleChange = (event) => {
+    const newTime = dayjs().hour(Number(event.target.value.split(":")[0])).minute(Number(event.target.value.split(":")[1])).second(0)
+    setAppointmentTime(newTime);
+  };
+
+  const handleSliderChange = (option, value) => {
+    dispatchAffections({ type: 'UPDATE_SLIDER', payload: { option, value } });
+  };
+
+  const MyButtonReason = styled(Button)(({ theme, active }) => ({
+    color: active ? 'white' : 'black',
+    backgroundColor: active ? '#115026' : '#e3fde8',
+    '&:hover': {
+      backgroundColor: active ? '#115026' : '#d3f6d6',
+    },
+    borderRadius: "15px",
+    padding: '10px 20px',
+    marginRight: theme.spacing(2),
+    margin: theme.spacing(1),
+  }));
+
+  const handleClickReason = (reason) => {
+    setActButtonReason(reason);
   };
 
   const handleComment = (event) => {
@@ -65,6 +138,7 @@ export const SetAppointment = () => {
 
   const handleDate = (date) => {
     setAppointmentDate(date);
+    getAvailableTimes();
   };
 
   const handleOpenModal = () => {
@@ -81,33 +155,30 @@ export const SetAppointment = () => {
 
     const formattedTime = appointmentTime.format("HH:mm:ss");
 
-    let response;
-
-    if (appointmentOption === "today") {
-      response = await axios.post(
-        `${environment.apiUrl}/appointments/${user.username}`,
-        {
-          appointmentStatus: "pending",
-          appointmentDate: `${formattedDate} ${formattedTime}`,
-          affections: { ...affections },
-          observations: commentForNurse,
-          painLevel: painLevel,
-        }
-      );
-    } else {
-      response = await axios.post(
-        `${environment.apiUrl}/appointments/${user.username}`,
-        {
-          appointmentStatus: "pending",
-          appointmentDate: `${formattedDate} ${formattedTime}`,
-          observations: commentForNurse,
-        }
-      );
-    }
+    const response = await axios.post(
+      `${environment.apiUrl}/appointments/${user.username}?newUserFromAppointment=false`,
+      {
+        headache: stateAffections.headache.checked ? stateAffections.headache.value : 0,
+        temperature: stateAffections.temperature.checked ? 1 : 0,
+        stomachache: stateAffections.stomachache.checked ? 1 : 0,
+        generalMalaise: stateAffections.disconfort.checked ? 1 : 0,
+        burningThroat: stateAffections.burningThroat.checked ? 1 : 0,
+        theresWound: stateAffections.theresWound.checked ? setTheresWound(stateAffections.theresWound.value) : 0,
+        appointmentType: actButtonReason,
+        appointmentStatus: "pending",
+        appointmentDate: appointmentOption === "today" ? `${formattedDate} 18:01` : `${formattedDate} ${formattedTime}`,
+        observations: commentForNurse,
+      }
+    );
     if (response !== null) {
+      toast.success(`Turno agendado correctamente a las ${response.data.split("T")[1]}`);
+      handleCloseModal();
+    } else {
       toast.error(response.detail);
     }
-    setAppointmentScheduled(true);
+    dispatchAffections({ type: "RESET_STATE" })
+    setAppointmentDate(dayjs(Date.now()))
+    setAppointmentTime(dayjs(Date.now()))
   };
 
   useEffect(() => {
@@ -140,14 +211,77 @@ export const SetAppointment = () => {
             borderRadius: "10px",
             display: "flex",
             flexDirection: "column",
+            height: "100vh",
+            overflowY: "auto",
           }}
         >
           <Typography
             sx={{ fontSize: "48px", lineHeight: "1", letterSpacing: "0" }}
           >
-            {"Agendar Turno"}
+            {"Agendar turno de atención"}
           </Typography>
           <Divider sx={{ borderColor: "black", paddingTop: "13px" }} />
+
+          <Typography
+            sx={{ fontSize: "24px", lineHeight: "1", letterSpacing: "0", paddingTop: "30px" }}
+          >
+            {"¿Cuál es su motivo de atención?"}
+          </Typography>
+
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 2 }}>
+            <MyButtonReason active={actButtonReason === 'appointment'} onClick={() => {
+              handleClickReason('appointment')
+              dispatchAffections({ type: 'RESET_STATE' })
+              setAppointmentTime(dayjs(Date.now()))
+              setAppointmentDate(dayjs(Date.now()))
+              setCommentForNurse("")
+            }}>
+              Turno médico
+            </MyButtonReason>
+            <MyButtonReason active={actButtonReason === 'vitalSignes'} onClick={() => {
+              handleClickReason('vitalSignes')
+              dispatchAffections({ type: 'RESET_STATE' })
+              setAppointmentTime(dayjs(Date.now()))
+              setAppointmentDate(dayjs(Date.now()))
+              setCommentForNurse("")
+            }}>
+              Toma de signos vitales
+            </MyButtonReason>
+            <MyButtonReason active={actButtonReason === 'injection'} onClick={() => {
+              handleClickReason('injection')
+              dispatchAffections({ type: 'RESET_STATE' })
+              setAppointmentTime(dayjs(Date.now()))
+              setAppointmentDate(dayjs(Date.now()))
+              setCommentForNurse("")
+            }}>
+              Aplicación de inyección
+            </MyButtonReason>
+            <MyButtonReason active={actButtonReason === 'desinfection'} onClick={() => {
+              handleClickReason('desinfection')
+              dispatchAffections({ type: 'RESET_STATE' })
+              setAppointmentTime(dayjs(Date.now()))
+              setAppointmentDate(dayjs(Date.now()))
+              setCommentForNurse("")
+            }}>
+              Desinfección de herida
+            </MyButtonReason>
+            <MyButtonReason active={actButtonReason === 'certificate'} onClick={() => {
+              handleClickReason('certificate')
+              dispatchAffections({ type: 'RESET_STATE' })
+              setAppointmentTime(dayjs(Date.now()))
+              setAppointmentDate(dayjs(Date.now()))
+              setCommentForNurse("")
+            }}>
+              Validación de certificado
+            </MyButtonReason>
+          </Box>
+
+          <Typography
+            sx={{ fontSize: "24px", lineHeight: "1", letterSpacing: "0", paddingTop: "30px" }}
+          >
+            {"¿Cúando desea agendar su cita?"}
+          </Typography>
+
           <Box
             sx={{ paddingTop: "35px", display: "flex", flexDirection: "row" }}
           >
@@ -199,6 +333,7 @@ export const SetAppointment = () => {
                     setAppointmentOption("otherDay");
                     setOtherDayButtonClass(!otherDayButtonClass);
                     setTodayButtonClass(!todayButtonClass);
+                    dispatchAffections({ type: 'RESET_STATE' })
                   }
                 }}
                 sx={{
@@ -227,7 +362,7 @@ export const SetAppointment = () => {
               justifyContent: "space-around",
             }}
           >
-            {appointmentOption === "today" ? (
+            {appointmentOption === "today" && actButtonReason === "appointment" ? (
               <Box
                 flex={4}
                 sx={{
@@ -237,158 +372,32 @@ export const SetAppointment = () => {
                   gap: 5,
                 }}
               >
-                <Typography sx={{ fontSize: "24px" }}>
-                  Seleccione la hora:
+                <Typography sx={{ fontSize: "1.5em", textAlign: "center", fontWeight: "bold" }}>
+                  ¿Siente alguno de estos malestares?
                 </Typography>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DemoContainer components={["TimePicker"]}>
-                    <TimePicker
-                      label=" "
-                      value={appointmentTime}
-                      onChange={(newTime) => setAppointmentTime(newTime)}
-                      sx={{ width: "100%", paddingRight: "50px" }}
-                    />
-                  </DemoContainer>
-                </LocalizationProvider>
-                <Typography sx={{ fontSize: "24px" }}>
-                  Selecciona si tienes alguna afección:
-                </Typography>
-                <FormControl component="fieldset" variant="standard">
-                  <FormGroup>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={affections.fever}
-                          onChange={handleCheckbox}
-                          name="fever"
-                        />
-                      }
-                      label="Temperatura alta"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={affections.injury}
-                          onChange={handleCheckbox}
-                          name="injury"
-                        />
-                      }
-                      label="Lesión o herida"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={affections.pain}
-                          onChange={handleCheckbox}
-                          name="pain"
-                        />
-                      }
-                      label="Dolor o malestar general"
-                    />
-                  </FormGroup>
-                </FormControl>
-                {affections.pain && (
-                  <Box sx={{ display: "flex", flexDirection: "column" }}>
-                    <Typography sx={{ alignSelf: "center" }}>
-                      ¿Qué tan fuerte es el dolor?
-                    </Typography>
-                    <FormControl>
-                      <RadioGroup
-                        aria-labelledby="demo-radio-buttons-group-label"
-                        defaultValue="0"
-                        name="radio-buttons-group"
-                        value={painLevel}
-                        onChange={handleRadio}
-                        sx={{
-                          paddingTop: "15px",
-                          display: "flex",
-                          flexDirection: "row",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <FormControlLabel
-                          value="1"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio icon={SentimentSatisfiedAltIcon} />}
-                          label="1"
-                        />
-                        <FormControlLabel
-                          value="2"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="2"
-                        />
-                        <FormControlLabel
-                          value="3"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="3"
-                        />
-                        <FormControlLabel
-                          value="4"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="4"
-                        />
-                        <FormControlLabel
-                          value="5"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="5"
-                        />
-                        <FormControlLabel
-                          value="6"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="6"
-                        />
-                        <FormControlLabel
-                          value="7"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="7"
-                        />
-                        <FormControlLabel
-                          value="8"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="8"
-                        />
-                        <FormControlLabel
-                          value="9"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={<Radio />}
-                          label="9"
-                        />
-                        <FormControlLabel
-                          value="10"
-                          sx={{ display: "flex", flexDirection: "column" }}
-                          control={
-                            <Radio icon={SentimentVeryDissatisfiedIcon} />
-                          }
-                          label="10"
-                        />
-                      </RadioGroup>
-                    </FormControl>
-                  </Box>
-                )}
-                <Box>
-                  <Typography sx={{ fontSize: "24px" }}>
-                    Agrega un comentario para el enfermero:
-                  </Typography>
-                  <TextareaAutosize
-                    value={commentForNurse}
-                    onChange={handleComment}
-                    style={{
-                      width: "440px",
-                      height: "116px",
-                      borderRadius: "28px",
-                      padding: "10px",
-                    }}
-                  />
-                </Box>
+                <Affections
+                  key={"affections"}
+                  onCheckboxChange={handleCheckboxChange}
+                  onSliderChange={handleSliderChange}
+                  options={stateAffections}
+                />
               </Box>
-            ) : (
+            ) : appointmentOption === "today" ? (
+              <Box sx={{ justifyItems: 'center' }}>
+                <Typography sx={{ fontSize: "24px" }}>
+                  ¿Desea agregar algún comentario/especificación al personal que lo atenderá?
+                </Typography>
+                <TextareaAutosize
+                  value={commentForNurse}
+                  onChange={handleComment}
+                  style={{
+                    width: "440px",
+                    height: "116px",
+                    borderRadius: "28px",
+                    padding: "10px",
+                  }}
+                />
+              </Box>) : (
               <Box
                 flex={4}
                 sx={{
@@ -416,19 +425,19 @@ export const SetAppointment = () => {
                   <Typography sx={{ fontSize: "24px" }}>
                     Seleccione la hora:
                   </Typography>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DemoContainer components={["TimePicker"]}>
-                      <TimePicker
-                        value={appointmentTime}
-                        onChange={(newTime) => setAppointmentTime(newTime)}
-                        sx={{ width: "100%", paddingRight: "50px" }}
-                      />
-                    </DemoContainer>
-                  </LocalizationProvider>
+                  <FormControl>
+                    <Select
+                      value={appointmentTime.format("HH:mm")}
+                      onChange={handleChange}
+                      displayEmpty
+                    >
+                      {availableTimesComponents}
+                    </Select>
+                  </FormControl>
                 </Box>
                 <Box>
                   <Typography sx={{ fontSize: "24px" }}>
-                    Agrega un comentario para el enfermero:
+                    ¿Desea agregar algún comentario/especificación al personal que lo atenderá?
                   </Typography>
                   <TextareaAutosize
                     value={commentForNurse}
@@ -443,41 +452,6 @@ export const SetAppointment = () => {
                 </Box>
               </Box>
             )}
-
-            <Box
-              flex={2}
-              sx={{
-                display: "flex",
-                backgroundColor: "#CCE5D0",
-                borderRadius: "10px",
-                align: "center",
-                justifyContent: "center",
-                padding: "40px",
-                flexDirection: "column",
-                height: "fit-content",
-              }}
-            >
-              <InfoIcon sx={{ fontSize: "5em", alignSelf: "center" }} />
-              <Typography
-                sx={{
-                  fontSize: "1.5em",
-                  textAlign: "center",
-                }}
-              >
-                RECUERDA
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: "1em",
-                  textAlign: "center",
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                Si crees que se trata de un caso grave, contacta a los números
-                de emergencia
-              </Typography>
-            </Box>
           </Box>
           <Button
             sx={{
@@ -494,6 +468,7 @@ export const SetAppointment = () => {
           </Button>
           {openModal && (
             <ConfirmAppointmentModal
+              isToday={appointmentOption === "today"}
               open={openModal}
               appointmentDate={appointmentDate.toDate()}
               appointmentTime={appointmentTime.toDate()}
@@ -504,6 +479,7 @@ export const SetAppointment = () => {
           )}
         </Box>
       </Box>
+      <ToastContainer />
     </Box>
   );
 };

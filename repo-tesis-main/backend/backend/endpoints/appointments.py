@@ -32,9 +32,9 @@ async def get_appointment_by_id(appointmentId: int):
 
 
 @router.post("/{username}")
-async def create_appointment(appointment: Appointment, username: str):
+async def create_appointment(appointment: Appointment, username: str, newUserFromAppointment: bool):
     try:
-        return appointments_controller.create(appointment=appointment, username=username)
+        return appointments_controller.create(appointment=appointment, username=username, newUserFromAppointment=newUserFromAppointment)
     except HTTPException as ex:
         raise ex
 
@@ -56,9 +56,9 @@ async def get_appointment_details(appointmentId: str):
 
 
 @router.put("/{appointmentId}/{appointmentStatus}")
-async def change_appointment_status(appointmentId: int, appointmentStatus: str):
+async def change_appointment_status(appointmentId: int, appointmentStatus: str, observations: str):
     try:
-        return appointments_controller.changeAppointmentStatus(appointmentId=appointmentId, appointmentStatus=appointmentStatus)
+        return appointments_controller.changeAppointmentStatus(appointmentId=appointmentId, appointmentStatus=appointmentStatus, observations=observations)
     except HTTPException as ex:
         raise ex
 
@@ -75,5 +75,13 @@ async def update_appointment_details(appointmentDetails: AppointmentDetails):
 async def get_dr_appointments(doctorId: int):
     try:
         return appointments_controller.getDrAppointments(doctorId)
+    except HTTPException as ex:
+        raise ex
+
+
+@router.get("/dates/{appointmentType}/{date}")
+async def get_appointment_dates(appointmentType: str, date: str):
+    try:
+        return appointments_controller.getAppointmentTimes(appointmentType, date)
     except HTTPException as ex:
         raise ex

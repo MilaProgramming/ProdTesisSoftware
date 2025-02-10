@@ -16,6 +16,8 @@ class UserDto(Base):
     name = Column(String)
     lastname = Column(String)
     email = Column(String)
+    DNI = Column(String)
+    DNIType = Column(String)
     appointments = relationship('AppointmentDto', back_populates='user')
 
     def user_dict(self):
@@ -25,7 +27,9 @@ class UserDto(Base):
             'role': self.role,
             'name': self.name,
             'lastname': self.lastname,
-            'email': self.lastname
+            'email': self.lastname,
+            'DNI': self.DNI,
+            'DNIType': self.DNIType
         }
 
 
@@ -35,11 +39,23 @@ class AppointmentDto(Base):
     id = Column(Integer, primary_key=True)
     appointmentStatus = Column(String)
     appointmentDate = Column(DateTime)
+    appointmentType = Column(String)
     userId = Column(ForeignKey('users.id'))
-    doctorId = Column(ForeignKey('user.id'))
+    nurseId = Column(ForeignKey('user.id'))
     user = relationship('UserDto', back_populates='appointments')
     appointmentDetails = relationship(
         'AppointmentDetailsDto', back_populates='appointment')
+
+    def appointment_to_dict(self):
+        """Convierte un objeto AppointmentDto a un diccionario."""
+        data = {}
+        data['id'] = self.id
+        data['appointmentStatus'] = self.appointmentStatus
+        data['appointmentDate'] = self.appointmentDate
+        data['appointmentType'] = self.appointmentType
+        data['userId'] = self.userId
+        data['nurseId'] = self.nurseId
+        return data
 
 
 class AppointmentDetailsDto(Base):
@@ -47,15 +63,18 @@ class AppointmentDetailsDto(Base):
 
     id = Column(Integer, primary_key=True)
     observations = Column(String)
-    diagnostic = Column(String)
-    prescription = Column(String)
-    indications = Column(String)
-    vitalSigns = Column(JSON)
-    generalAffections = Column(JSON)
     triageStatus = Column(Integer)
-    patientStatus = Column(Integer)
-    theresLession = Column(Integer)
-    painLevel = Column(Integer)
+    headache = Column(Integer)
+    temperature = Column(Integer)
+    stomachache = Column(Integer)
+    generalMalaise = Column(Integer)
+    burningThroat = Column(Integer)
+    theresWound = Column(Integer)
     appointmentId = Column(ForeignKey('appointments.id'))
     appointment = relationship(
         'AppointmentDto', back_populates='appointmentDetails')
+
+    def dict(self):
+        return {
+            "observations": self.observations
+        }

@@ -31,11 +31,11 @@ function LoginPage() {
       } else {
         toast.error("Contraseña incorrecta");
       }
-    } catch (error) {}
+    } catch (error) { }
   };
 
   useEffect(() => {
-    if (localStorage.getItem("session")) {
+    if (localStorage.getItem("session") !== null && localStorage.getItem("session") !== "null") {
       navigate("/home");
     }
     // eslint-disable-next-line
@@ -65,6 +65,8 @@ function LoginPage() {
           alignItems: "center",
           marginX: "15px",
           justifyContent: "center",
+          overflowY: "auto",
+          height: "100vh",
         }}
       >
         <img

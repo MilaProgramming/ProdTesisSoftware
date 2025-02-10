@@ -25,7 +25,9 @@ class RegisterRepository(IRegisterRepository):
                 password=hexa_hashed_password,
                 role=user.role, name=user.name,
                 lastname=user.lastname,
-                email=user.email
+                email=user.email,
+                DNI=user.DNI,
+                DNIType=user.DNIType
             )
             self.session.add(newUser)
             self.session.commit()

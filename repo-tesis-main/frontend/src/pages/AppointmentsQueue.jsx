@@ -4,7 +4,6 @@ import SessionContext from "../context/SessionContext";
 import { CustomDrawer } from "../components/Drawer/CustomDrawer";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from "axios";
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { environment } from "../utils/evironment";

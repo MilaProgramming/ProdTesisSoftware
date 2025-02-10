@@ -15,3 +15,5 @@ class NewUser(BaseModel):
     name: str
     lastname: str
     email: str
+    DNI: str
+    DNIType: str

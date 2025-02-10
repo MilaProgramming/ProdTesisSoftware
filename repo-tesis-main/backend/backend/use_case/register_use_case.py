@@ -26,7 +26,9 @@ class RegisterUseCase(BaseUseCase):
                 role=user.role,
                 name=user.name,
                 lastname=user.lastname,
-                email=user.email)
+                email=user.email,
+                DNI=user.DNI,
+                DNIType=user.DNIType)
                 for user in response]
             for user in users:
                 del user.password
@@ -36,7 +38,6 @@ class RegisterUseCase(BaseUseCase):
 
     def changeUserRole(self, userId: str, userRole: str):
         try:
-            print(userId)
             response = self.repository.changeUserRole(
                 userId, userRole)
             return response

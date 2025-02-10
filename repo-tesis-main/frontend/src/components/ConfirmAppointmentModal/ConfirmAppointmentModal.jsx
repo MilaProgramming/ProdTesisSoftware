@@ -27,8 +27,13 @@ export const ConfirmAppointmentModal = ({
   appointmentDate,
   appointmentTime,
   appointmentScheduled,
+  isToday
 }) => {
   if (!open) return null;
+  const today = new Date()
+  appointmentDate.setSeconds(0, 0);
+  appointmentDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -53,16 +58,24 @@ export const ConfirmAppointmentModal = ({
             }}
           >
             <Typography sx={{ fontSize: "36px" }}>
-              {`${appointmentDate.getDate()} de ${
-                months[appointmentDate.getMonth()]
-              } del ${appointmentDate.getFullYear()}`}
+              {`${appointmentDate.getDate()} de ${months[appointmentDate.getMonth()]
+                } del ${appointmentDate.getFullYear()}`}
             </Typography>
-            <Typography sx={{ fontSize: "36px" }}>
-              {appointmentTime.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </Typography>
+            {isToday ? (
+              <Typography textAlign={"center"} sx={{ fontSize: "36px" }}>
+                El sistema agendará el turno de <br />
+                acuerdo al nivel de urgencia <br />
+                y disponibilidad
+              </Typography>
+            )
+              : (
+                <Typography sx={{ fontSize: "36px" }}>
+                  {appointmentTime.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Typography>)
+            }
           </Box>
           <Box sx={{ display: "flex", justifyContent: "space-around", mt: 4 }}>
             <Button variant="contained" color="success" onClick={onConfirm}>
