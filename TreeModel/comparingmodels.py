@@ -1,10 +1,13 @@
 import pickle
+import time
+import tracemalloc
 from sklearn.tree import DecisionTreeClassifier, export_text
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+import numpy as np
 
-# Datos de entrenamiento optimizados y niveles de urgencia
-# Etiquetas = [dolor_cabeza, temperatura_alta, dolor_abdominal, malestar_general, dolor_garganta, golpe]
-# "no presente" = 0, "presente" = 1; Para dolor de cabeza escala 1 leve, 5 fuerte;
-
+# Datos de entrenamiento y niveles de urgencia
 X = [
     # Casos Críticos (Nivel 1)
     [5, 1, 1, 1, 1, 1],  # Todos los síntomas graves presentes.
@@ -40,35 +43,34 @@ y = [
     5, 5, 5   # No Urgente
 ]
 
-# Entrenar un clasificador de árbol de decisión
-clf = DecisionTreeClassifier()
-clf.fit(X, y) 
+# Dividir los datos en entrenamiento y prueba
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-# Ejemplo: Predecir urgencia para nuevos síntomas
-# Síntomas: dolor de cabeza leve, temperatura alta, dolor de estómago fuerte, sin dolor de garganta, sin golpe
-nuevos_sintomas = [[1, 1, 1, 1, 0, 0]]
-nivel_urgencia = clf.predict(nuevos_sintomas)
+# Función para evaluar modelos
+def evaluate_model(model, X_train, X_test, y_train, y_test):
+    tracemalloc.start()
+    start_time = time.time()
+    model.fit(X_train, y_train)
+    train_time = time.time() - start_time
+    memory_usage = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    
+    return {
+        'accuracy': accuracy,
+        'train_time': train_time,
+        'memory_usage': memory_usage[1]  # Peak memory usage
+    }
 
-print("Nivel de urgencia predicho:", nivel_urgencia[0])
+# Entrenar y evaluar modelos
+decision_tree = DecisionTreeClassifier()
+gb_classifier = GradientBoostingClassifier()
 
-# Mostrar la estructura del árbol de decisión
-reglas_arbol = export_text(clf, feature_names=[
-    "dolor_cabeza", "temperatura_alta", "dolor_abdominal", "malestar_general", "dolor_garganta", "golpe"
-])
-print(reglas_arbol)
+dt_results = evaluate_model(decision_tree, X_train, X_test, y_train, y_test)
+gb_results = evaluate_model(gb_classifier, X_train, X_test, y_train, y_test)
 
-# Detalles del modelo
-tree = clf.tree_
-
-for i in range(tree.node_count):
-    print(f"Node {i}:")
-    print(f"  Gini impurity: {tree.impurity[i]}")
-    print(f"  Samples: {tree.n_node_samples[i]}")
-    print(f"  Value (class distribution): {tree.value[i]}")
-
-
-# Guardar el modelo en un archivo .pkl
-with open('modelo_arbol.pkl', 'wb') as file:
-    pickle.dump(clf, file)
-
-print("Modelo guardado como 'modelo_arbol.pkl'")
+# Comparar modelos
+print("Decision Tree Results:", dt_results)
+print("Gradient Boosting Results:", gb_results)
